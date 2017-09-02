@@ -11,9 +11,9 @@ def fun(y_index ,test, training):
 	#test, training = dataset[:1000,:], dataset[1000:,:]
 	
 	clf = svm.SVC()
-	clf.fit(training[:,:5], training[:,y_index])	
+	clf.fit(training[:,:4], training[:,y_index])	
 	
-	y_hat = clf.predict(test[:,:5])
+	y_hat = clf.predict(test[:,:4])
 	y = test[:,y_index]
 
 
@@ -39,8 +39,8 @@ for x in x_csv:
 	y_set = ['opening - opening','closing - closing', 'closing - opening']
 
 	print x
-	for i in [6,7,8] :
-		print y_set[i-6]
+	for i in [5,6,7] :
+		print y_set[i-5]
 #		print type(overall)
 		fun(int(i), test, training)
 	print ''

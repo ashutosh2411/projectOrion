@@ -1,0 +1,48 @@
+svm_ICICIBANK-I.csv
+opening - opening
+20.6
+closing - closing
+49.8
+closing - opening
+11.5
+
+svm_TATAMOTORS-I.csv
+opening - opening
+23.8
+closing - closing
+53.5
+closing - opening
+18.3
+
+svm_HDFCBANK-I.csv
+opening - opening
+37.8
+closing - closing
+49.2
+closing - opening
+28.9
+
+svm_JETAIRWAYS-I.csv
+opening - opening
+41.9
+closing - closing
+46.7
+closing - opening
+39.8
+
+svm_NIFTY-I.csv
+opening - opening
+45.2
+closing - closing
+45.8
+closing - opening
+49.4
+
+svm_RELIANCE-I.csv
+opening - opening
+43.5
+closing - closing
+46.1
+closing - opening
+34.2
+

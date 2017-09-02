@@ -31,14 +31,14 @@ def process_file (in_address, out_address):
 
 	out = np.vstack((closing_closing, opening_opening, closing_opening))
 	
-	t = np.asarray(range(1,data.shape[1]+1))[np.newaxis]
-	print data.T.shape
-	print t.T.shape
-	print out.T.shape
+	#t = np.asarray(range(1,data.shape[1]+1))[np.newaxis]
+	#print data.T.shape
+	#print t.T.shape
+	#print out.T.shape
 
-	overall   = np.hstack((t.T, data.T, out.T))
+	overall   = np.hstack((data.T, out.T))
 
-	np.savetxt(out_address, overall, fmt = '%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f')
+	np.savetxt(out_address, overall, fmt = '%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f')
 
 
 only_csv_files = [f for f in listdir('../datasets_raw') if isfile(join('../datasets_raw', f)) and f.endswith('.csv')]
