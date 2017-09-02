@@ -13,3 +13,4 @@ Repo Structure:
 
 Status Log:
   - Sept 2, 2017 (14.03): Processing raw data to get the input for SVM Classifier.
+  - Sept 2, 2017 (18.24): Implemented SVM. 
