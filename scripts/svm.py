@@ -27,7 +27,7 @@ def fun(y_index ,test, training):
 
 
 
-x_csv = [f for f in listdir('../datasets_pro') if isfile(join('../datasets_pro', f)) and f.endswith('.csv')]
+x_csv = [f for f in listdir('../datasets_pro') if isfile(join('../datasets_pro', f)) and f.endswith('.csv') and f.startswith('svm_')]
 for x in x_csv:
 
 	x_address = '../datasets_pro/' + x
