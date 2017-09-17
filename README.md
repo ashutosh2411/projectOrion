@@ -15,4 +15,5 @@ Status Log:
   - Sept 2, 2017 (14.03): Processing raw data to get the input for SVM Classifier.
   - Sept 2, 2017 (18.24): Implemented SVM. 
   - Sept 9, 2017 (01.03): Implemented RF.
-  - Sept 13, 2014 (16.41): Implemented SVM using LIBSVM
+  - Sept 13, 2017 (16.41): Implemented SVM using LIBSVM
+  - Sept 17, 2017 (05:40): Implemented technical indicators in Random Forest and SVM
