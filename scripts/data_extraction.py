@@ -23,6 +23,7 @@ def diff_attribute_difference (data1, data2):
 def process_file (data, out_address):
 # process file to get the closing_closing, opening_opening, closing_opening in a matrix
 	feature_mat = data.T[2:-3]
+#	print (feature_mat.shape)
 	feature_mat = np.vstack((feature_mat[:,15:], 
 					stochastic_osci(),
 					william(),
@@ -36,13 +37,18 @@ def process_file (data, out_address):
 					exponential_moving_aver(10),
 					exponential_moving_aver(15) ))
 
-	closing_closing = np.sign(same_attribute_difference(feature_mat[3]))
-	opening_opening = np.sign(same_attribute_difference(feature_mat[0]))
-	closing_opening = np.sign(diff_attribute_difference(feature_mat[0], feature_mat[3]))
+	closing_closing = np.sign(same_attribute_difference(data.T[2+3]))[15:]
+#	print closing_closing
+	opening_opening = np.sign(same_attribute_difference(data.T[2+0]))[15:]
+#	print opening_opening
+	closing_opening = np.sign(diff_attribute_difference(data.T[2+0], data.T[2+3]))[15:]
+#	print closing_opening
 
 	out = np.vstack((closing_closing, opening_opening, closing_opening))
-	overall   = np.hstack((feature_mat.T, out.T))
-	np.savetxt(out_address, overall, fmt = '%.2f, '*19)
+	overall = np.hstack((feature_mat.T, out.T))
+	head = ['open', 'high', 'low', 'clos', 'volm', 'sto', 'will', 'prate', 'bvol', 'sma1', 'sma2', 'wma1', 'wma2', 'std', 'ema1', 'ema2', 'ycc', 'yoo', 'yoc']
+	#overall = np.vstack((head,overall))  
+	np.savetxt(out_address, overall, fmt = '%.2f,\t'*19)
 
 def rsi(days) :
 	rsIndicator =[]
