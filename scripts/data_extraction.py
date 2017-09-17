@@ -198,6 +198,6 @@ only_csv_files = [f for f in listdir('../datasets_raw') if isfile(join('../datas
 for x in only_csv_files:
 	
 	in_address  = '../datasets_raw/' + x
-	out_address = '../datasets_pro/svm_indi_' + x[:-4] + '.csv'
+	out_address = '../datasets_pro/indi_' + x[:-4] + '.csv'
 	data = np.genfromtxt(in_address,delimiter=',')
 	process_file (data, out_address)
