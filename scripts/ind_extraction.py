@@ -1,49 +1,94 @@
-"""
-Program to process .csv files from folder "../datasets_raw/" to "../datasets_pro/"
-"""
-
-import numpy as np
-from os import listdir
-from os.path import isfile, join
+#!/usr/bin/python
+########################################################################################################################
+################# ALL INDICATOR LISTS ARE TRIMMED FROM TOP TO ALLIGN IN SAME LENGTH OF 2981#############################
+######################################################################################################################## 
+import numpy as np 
+import sklearn  as sk
+from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
+ 
+def main() :
+	
+	#calculating relative strength index
+	feature_matrix =[]
+	for i in range(1,4) :
+		feature_matrix.append( rsi(5*i)) 
+	
+		Ytr = []
+	opening = []
+	closing = []
+	high    = []
+	low     = []
+	volume  = []
+	for i in range (15, 2996):
+		opening.append(data[i][2])
+		closing.append(data[i-1][5])
+		high.append(data[i-1][3])
+		low.append(data[i-1][4])
+		volume.append(data[i-1][6])
+		if data[i][2] > data[i][5]:
+			Ytr.append(-1)
+		else:
+			Ytr.append(1)
 
-def same_attribute_difference (data):
-# current day's value - previous days value of an attribute
-# first entry is 0
-	tmp  = data
-	tmp_ = np.hstack((tmp,0))
-	tmp  = np.hstack((0,tmp))
-	ret  = tmp_ -tmp
-	return np.hstack((0,ret[1:-1])) 
 
-def diff_attribute_difference (data1, data2):
-# current day's attribute1 - attribute2 values
-	return data2 - data1
+	Ytr = np.asarray(Ytr)
 
-def process_file (data, out_address):
-# process file to get the closing_closing, opening_opening, closing_opening in a matrix
-	feature_mat = data.T[2:-3]
-	feature_mat = np.vstack((feature_mat[:,15:], 
-					stochastic_osci(),
-					william(),
-					price_rate_change(5),
-					on_balance_volume(),
-					simple_moving_average(5),
-					simple_moving_average(10),
-					weighed_moving_average(5),
-					weighed_moving_average(10),
-					stochastic_d(5),
-					exponential_moving_aver(10),
-					exponential_moving_aver(15) ))
+	feature_matrix.append(opening)
+	feature_matrix.append(closing)
+	feature_matrix.append(high)
+	feature_matrix.append(low)
+	feature_matrix.append(volume)
+	
+   
+	#calculating stochastic oscillator indicator for last 14 days
+	feature_matrix.append(stochastic_osci())
+	
+	#calculating william indicator for last 14 days
+	feature_matrix.append(william())
+	
+	#calculating  price_rate_change for last n  days
+	feature_matrix.append(price_rate_change(5))
 
-	closing_closing = np.sign(same_attribute_difference(feature_mat[3]))
-	opening_opening = np.sign(same_attribute_difference(feature_mat[0]))
-	closing_opening = np.sign(diff_attribute_difference(feature_mat[0], feature_mat[3]))
+	#calculating on balance volume
+	feature_matrix.append(on_balance_volume())
 
-	out = np.vstack((closing_closing, opening_opening, closing_opening))
-	overall   = np.hstack((feature_mat.T, out.T))
-	np.savetxt(out_address, overall, fmt = '%.2f, '*19)
+	#calculating simple moving average for n days 
+	feature_matrix.append(simple_moving_average(5))
+	feature_matrix.append(simple_moving_average(10))
+	
+	#calculating weighted moving average for n days 
+	feature_matrix.append(weighed_moving_average(5))
+	feature_matrix.append(weighed_moving_average(10))
+	
+	#calculating stochastic %d   for n days
+	feature_matrix.append(stochastic_d(5))
+	
+	#calculating exponential moving average for n days
+	feature_matrix.append(exponential_moving_aver(10))
+	feature_matrix.append(exponential_moving_aver(15))
 
+
+	feature_matrix = np.array(feature_matrix)
+	feature_matrix = feature_matrix.T
+
+
+	clf = svm.SVC()
+	
+	clf.fit(feature_matrix[:2000], Ytr[:2000])
+
+	classifier = RandomForestClassifier(n_estimators=30, criterion='gini', max_depth=None,
+						min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
+						 max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, 
+						min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, 
+						random_state=None, verbose=0, warm_start=False, class_weight=None)
+	classifier.fit(feature_matrix[:2000], Ytr[:2000])
+
+	print(classifier.score(feature_matrix[2000:],Ytr[2000:]))
+	print(clf.score(feature_matrix[2000:],Ytr[2000:]))
+
+
+################################################################################
 def rsi(days) :
 	rsIndicator =[]
 	profit = 0 
@@ -186,12 +231,3 @@ for x in x_csv:
 	test, training = overall[:1000,:], overall[1000:,:]
 	
 
-
-
-only_csv_files = [f for f in listdir('../datasets_raw') if isfile(join('../datasets_raw', f)) and f.endswith('.csv')]
-for x in only_csv_files:
-	
-	in_address  = '../datasets_raw/' + x
-	out_address = '../datasets_pro/svm_indi_' + x[:-4] + '.csv'
-	data = np.genfromtxt(in_address,delimiter=',')
-	process_file (data, out_address)
