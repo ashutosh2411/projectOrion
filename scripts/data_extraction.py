@@ -48,7 +48,7 @@ def process_file (data, out_address):
 	overall = np.hstack((feature_mat.T, out.T))
 	head = ['open', 'high', 'low', 'clos', 'volm', 'sto', 'will', 'prate', 'bvol', 'sma1', 'sma2', 'wma1', 'wma2', 'std', 'ema1', 'ema2', 'ycc', 'yoo', 'yoc']
 	#overall = np.vstack((head,overall))  
-	np.savetxt(out_address, overall, fmt = '%.2f,\t'*19)
+	np.savetxt(out_address, overall, fmt = '%.2f,\t'*7+'%.8f,\t'+'%.2f,\t'*11)
 
 def rsi(days) :
 	rsIndicator =[]
