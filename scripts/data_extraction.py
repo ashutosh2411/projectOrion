@@ -46,9 +46,10 @@ def process_file (data, out_address):
 
 	out = np.vstack((closing_closing, opening_opening, closing_opening))
 	overall = np.hstack((feature_mat.T, out.T))
-	head = ['open', 'high', 'low', 'clos', 'volm', 'sto', 'will', 'prate', 'bvol', 'sma1', 'sma2', 'wma1', 'wma2', 'std', 'ema1', 'ema2', 'ycc', 'yoo', 'yoc']
+	head = 'open,high,low,clos,volm,sto,will,prate,bvol,sma1,sma2,wma1,wma2,std,ema1,ema2,ycc,yoo,yoc'
 	#overall = np.vstack((head,overall))  
-	np.savetxt(out_address, overall, fmt = '%.2f,\t'*7+'%.8f,\t'+'%.2f,\t'*8+'%.0f,\t'*3)
+	np.savetxt(out_address, overall, header = head, fmt = '%.2f,\t'*7+'%.8f,\t'+'%.2f,\t'*8+'%d,\t%d,\t%d', comments='')
+	#np.savetxt(out_address[:-4]+'_out.csv', out.T, header = 'ycc,y00,yoc', fmt = '%d,\t%d,\t%d')
 
 def rsi(days) :
 	rsIndicator =[]
