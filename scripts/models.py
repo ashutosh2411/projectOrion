@@ -6,6 +6,8 @@ import pandas
 import sklearn
 import pandas
 
+from os import listdir
+from os.path import isfile, join
 from sklearn import model_selection
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -17,71 +19,57 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 
-in_columns  = ['open', 'high', 'low', 'clos', 'volm', 'sto', 'will', 'prate', 'bvol', 'sma1', 'sma2', 'wma1', 'wma2', 'std', 'ema1', 'ema2']
-out_columns = ['ycc']
+def AllModels (file, in_columns, out_columns):		
+	dataset = pandas.read_csv(file , usecols = [0]+in_columns+out_columns)
 
-file = '../datasets_pro/indi_NIFTY-I.csv'
+	dataset_ = dataset.sample(frac=1)
+	array = dataset_.values
+	X = array[:,in_columns]
+	Y = array[:,out_columns]
+	#print X[range(10),:]
+	#print Y[range(10),:]
+	validation_size = 0.2
+	seed = 7
+	#scoring = 'accuracy'
 
-dataset = pandas.read_csv(file , usecols = in_columns+out_columns)
+	X_train, X_validation, Y_train, Y_validation = model_selection.train_test_split(X, Y, test_size=validation_size, random_state=seed)
 
-dataset_ = dataset.sample(frac=1)
-array = dataset_.values
-X = array[:,0:-1]
-Y = array[:,-1]
-validation_size = 0.1
-seed = 9
-scoring = 'accuracy'
+	lr = LogisticRegression()
+	lr.fit(X_train, Y_train)
+	predictions = lr.predict (X_validation)
+	print 'LR : ' + str(accuracy_score(Y_validation, predictions))
 
-X_train, X_validation, Y_train, Y_validation = model_selection.train_test_split(X, Y, test_size=validation_size, random_state=seed)
+	lda = LinearDiscriminantAnalysis()
+	lda.fit(X_train, Y_train)
+	predictions = lda.predict (X_validation)
+	print 'LDA: ' +str(accuracy_score(Y_validation, predictions))
 
-models = []
-models.append(('LR ', LogisticRegression()))
-models.append(('LDA', LinearDiscriminantAnalysis()))
-models.append(('KNN', KNeighborsClassifier()))
-models.append(('RF ', DecisionTreeClassifier()))
-models.append(('NB ', GaussianNB()))
-models.append(('SVM', SVC()))
+	knn = KNeighborsClassifier()
+	knn.fit(X_train, Y_train)
+	predictions = knn.predict (X_validation)
+	print 'KNN: '+str(accuracy_score(Y_validation, predictions))
 
-results = []
-names = []
-for name, model in models:
-	kfold = model_selection.KFold(n_splits=10, random_state=seed)
-	cv_results = model_selection.cross_val_score(model, X_train, Y_train, cv=kfold, scoring=scoring)
-	results.append(cv_results)
-	names.append(name)
-	msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
-	print(msg)
+	rf = DecisionTreeClassifier()
+	rf.fit(X_train, Y_train)
+	predictions = rf.predict (X_validation)
+	print 'RF : ' +str(accuracy_score(Y_validation, predictions))
 
-print '--------------------'
+	nb = GaussianNB()
+	nb.fit(X_train, Y_train)
+	predictions = nb.predict (X_validation)
+	print 'NB : '+str(accuracy_score(Y_validation, predictions))	
 
-lr = LogisticRegression()
-lr.fit(X_train, Y_train)
-predictions = lr.predict (X_validation)
-print 'LR : ' + str(accuracy_score(Y_validation, predictions))
+	svm = SVC()
+	svm.fit(X_train, Y_train)
+	predictions = svm.predict (X_validation)
+	print 'SVM: '+str(accuracy_score(Y_validation, predictions))	
+	print '--------------------'
 
-lda = LinearDiscriminantAnalysis()
-lda.fit(X_train, Y_train)
-predictions = lda.predict (X_validation)
-print 'LDA: ' +str(accuracy_score(Y_validation, predictions))
+in_columns  = range(16)
+out_columns = [16]
 
-knn = KNeighborsClassifier()
-knn.fit(X_train, Y_train)
-predictions = knn.predict (X_validation)
-print 'KNN: '+str(accuracy_score(Y_validation, predictions))
-
-rf = DecisionTreeClassifier()
-rf.fit(X_train, Y_train)
-predictions = rf.predict (X_validation)
-print 'RF : ' +str(accuracy_score(Y_validation, predictions))
-
-nb = GaussianNB()
-nb.fit(X_train, Y_train)
-predictions = nb.predict (X_validation)
-print 'NB : '+str(accuracy_score(Y_validation, predictions))	
-
-svm = SVC()
-svm.fit(X_train, Y_train)
-predictions = svm.predict (X_validation)
-print 'SVM: '+str(accuracy_score(Y_validation, predictions))	
-
-print '--------------------'
+x_csv = [f for f in listdir('../datasets_pro') if isfile(join('../datasets_pro', f)) and f.endswith('.csv') and f.startswith('indi_')]
+for x in x_csv:
+	x_address = '../datasets_pro/' + x
+	print x[5:-4]
+	AllModels(x_address, in_columns, out_columns)
