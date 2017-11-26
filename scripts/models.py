@@ -24,7 +24,8 @@ def AllModels (file, in_columns, out_columns):
 
 	dataset_ = dataset.sample(frac=1)
 	array = dataset_.values
-	X = array[:,in_columns]
+	print(array.shape)
+	X = array[:,[0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]]
 	Y = array[:,out_columns]
 	#print X[range(10),:]
 	#print Y[range(10),:]

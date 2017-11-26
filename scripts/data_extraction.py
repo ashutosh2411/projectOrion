@@ -86,8 +86,8 @@ def rsi(days) :
 def stochastic_osci() :
 	sOindicator = []
 	for i in range(14, len(data)) :
-		numerator = data[i][5]-min(data[i-14:i+1,4])
-		denominator = max(data[i-14:i+1 ,3])-min(data[i-14:i+1,4])
+		numerator = data[i][5]-min(data[i-14:i,4])
+		denominator = max(data[i-14:i ,3])-min(data[i-14:i,4])
 								   
 		
 		sOindicator.append(numerator/denominator*100)
@@ -98,8 +98,8 @@ def stochastic_osci() :
 def william() :
 	williamIndicator = []
 	for i in range(14, len(data)) :
-		numerator = max(data[i-14:i+1,3]) - data[i][5]
-		denominator = max(data[i-14:i+1 ,3])-min(data[i-14:i+1,4])
+		numerator = max(data[i-14:i,3]) - data[i][5]
+		denominator = max(data[i-14:i ,3])-min(data[i-14:i,4])
 								   
 		
 		williamIndicator.append(numerator/denominator*(-100))
@@ -137,7 +137,7 @@ def simple_moving_average(days) :
 	indicator = []
 	for i in range(days, len(data)) :
 		
-		indicator.append(sum(data[i-days +1 :i+1,5])/days)
+		indicator.append(sum(data[i-days +1 :i,5])/days)
 	if days == 5 :
 		  indicator = indicator[10:]
 	elif days == 10 :
@@ -150,11 +150,11 @@ def simple_moving_average(days) :
 def weighed_moving_average(days) :
 	indicator = []
 	li =[]
-	for i in range(days):
+	for i in range(days-1):
 		li.append(days-i)
 	li = np.asarray(li)
 	for i in range(days, len(data)) :
-		x = np.dot(data[i-days + 1:i+1,5],li)
+		x = np.dot(data[i-days + 1:i,5],li)
 		indicator.append(float(x)/sum(li))
 	if days == 5 :
 		  indicator = indicator[10:]
@@ -168,7 +168,7 @@ def stochastic_d(days):
 	li = stochastic_osci() 
 	indicator = []
 	for i in range(days,len(data)) :
-		indicator.append(sum(li[i-days+1: i +1])/days)
+		indicator.append(sum(li[i-days+1: i])/days)
 	indicator = indicator[10:]
 	return indicator 
 
@@ -178,10 +178,10 @@ def exponential_moving_aver(days):
 	indicator = []
 	alpha = 2/float(1+days)
 	li =[ alpha ]
-	for i in range(1,days) :
+	for i in range(1,days-1) :
 		li.append(pow((1-alpha),i))    
 	for i in range(days,len(data)) :    
-		indicator.append( np.dot(li , data[i-days+1:i+1,5])/sum(li))
+		indicator.append( np.dot(li , data[i-days+1:i,5])/sum(li))
 	if days == 10 :
 		  indicator = indicator[5:]
 	return indicator 
