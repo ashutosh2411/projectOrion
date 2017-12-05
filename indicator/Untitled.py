@@ -45,7 +45,7 @@ def main() :
    
     #calculating stochastic oscillator indicator for last 14 days
     feature_matrix.append(stochastic_osci())
-    
+    feature_matrix.append(rsi(10))
     #calculating william indicator for last 14 days
     feature_matrix.append(william())
     
@@ -77,17 +77,17 @@ def main() :
 
     clf = svm.SVC()
     
-    clf.fit(feature_matrix[:2000], Ytr[:2000])
+    clf.fit(feature_matrix[:200], Ytr[:200])
 
-    classifier = RandomForestClassifier(n_estimators=30, criterion='gini', max_depth=None,
+    classifier = RandomForestClassifier(n_estimators=80, criterion='gini', max_depth=None,
      					min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
     					 max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, 
      					min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, 
      					random_state=None, verbose=0, warm_start=False, class_weight=None)
-    classifier.fit(feature_matrix[:2000], Ytr[:2000])
+    classifier.fit(feature_matrix[:200], Ytr[:200])
 
-    print(classifier.score(feature_matrix[2000:],Ytr[2000:]))
-    print(clf.score(feature_matrix[2000:],Ytr[2000:]))
+    print(classifier.score(feature_matrix[200:],Ytr[200:]))
+    print(clf.score(feature_matrix[200:],Ytr[200:]))
 
 
 ################################################################################
@@ -118,7 +118,8 @@ def rsi(days) :
     if days == 5 :
     	  rsIndicator = rsIndicator[10:]
     elif days == 10 :
-        rsIndicator = rsIndicator[5:]    
+        rsIndicator = rsIndicator[5:]  
+
     return rsIndicator
     
     
@@ -126,8 +127,8 @@ def rsi(days) :
 def stochastic_osci() :
     sOindicator = []
     for i in range(14, len(data)) :
-        numerator = data[i][5]-min(data[i-14:i+1,4])
-        denominator = max(data[i-14:i+1 ,3])-min(data[i-14:i+1,4])
+        numerator = data[i][5]-min(data[i-14:i,4])
+        denominator = max(data[i-14:i ,3])-min(data[i-14:i,4])
                                    
         
         sOindicator.append(numerator/denominator*100)
@@ -138,8 +139,8 @@ def stochastic_osci() :
 def william() :
     williamIndicator = []
     for i in range(14, len(data)) :
-        numerator = max(data[i-14:i+1,3]) - data[i][5]
-        denominator = max(data[i-14:i+1 ,3])-min(data[i-14:i+1,4])
+        numerator = max(data[i-14:i,3]) - data[i][5]
+        denominator = max(data[i-14:i ,3])-min(data[i-14:i,4])
                                    
         
         williamIndicator.append(numerator/denominator*(-100))
