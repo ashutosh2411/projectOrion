@@ -65,7 +65,7 @@ def main():
 	i22 = TEMA(c,10)
 	i23 = ADX (h,l,c,14)
 	i24 = MFI (h,l,c,v,14)
-	i25 = ATR (h,l,c,14)
+	i25 = ATR (h,l,c,10)
 	i26 = DIS(c,SMA(c,5))
 	i27 = DIS(c,SMA(c,10))
 	i28 = DIS(c,WMA(c,5))
