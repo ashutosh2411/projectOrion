@@ -56,7 +56,7 @@ def main():
 	i11 = ROC (c,12)
 	i12 = OBV (c,v)
 	i13 = AD (h,l,c,v)
-	i14 = MOM (c,10)
+	i14 = MOM (c,5)
 	i15 = SMA (c,5)
 	i16 = WMA (c,5)
 	i17 = EMA (c,12)
