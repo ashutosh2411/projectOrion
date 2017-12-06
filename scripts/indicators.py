@@ -61,7 +61,7 @@ def main():
 	i16 = WMA (c,5)
 	i17 = EMA (c,12)
 	i18 = TSF (c,10)
-	i19, i20, i21 = BBANDS(c,5,2,2,0)
+	i19, i20, i21 = BBANDS(c,20,2,2,0)
 	i22 = TEMA(c,10)
 	i23 = ADX (h,l,c,14)
 	i24 = MFI (h,l,c,v,14)
