@@ -19,7 +19,7 @@ def main():
 	day_yoc = day_to_date(date_yoc)
 
 	data = data[:,[2,3,4,5,6]]
-	#print data.shape
+	##print data.shape
 	o = np.array(list(data[:,0]))
 	h = np.array(list(data[:,1]))
 	l = np.array(list(data[:,2]))
@@ -28,8 +28,10 @@ def main():
 	o_ = np.hstack((o[1:],0))
 	v = v.astype(float)
 	y = ycc(c,11) 
+	y_hc = yoc(c,h)
+	y_lc = yoc(c,l)
 	ypast = yccpast(c,11)
-	print ypast.shape
+	#print ypast.shape
 	yoc_cc = yocpast(o,c)
 	yoc_oc = np.hstack((yoc_cc[1:],0))
 	out = [0]*y.shape[1]
@@ -45,7 +47,8 @@ def main():
 
 	out = np.vstack((t1,t2,t3,out[1:]))
 	i1 = RSI (c,14)
-	i2, i3, i4 = MACD (c,12,26,9)
+	
+	i2, i3, i4 = MACD (c,6,13,5)
 	i5 = WILLR (h,l,c,14)
 	i6, i7 = STOCH(h,l,c,5,3,0,3,0)
 	i8, i9 = STOCHRSI(c,14,5,3,0)
@@ -63,25 +66,30 @@ def main():
 	i23 = ADX (h,l,c,14)
 	i24 = MFI (h,l,c,v,14)
 	i25 = ATR (h,l,c,14)
-	
+	i26 = DIS(c,SMA(c,5))
+	i27 = DIS(c,SMA(c,10))
+	i28 = DIS(c,WMA(c,5))
+	i29 = DIS(c,WMA(c,10))
+	i30 = OCRSI(o,c,14)
 	#saving indicators to ind.csv
-	indicators = np.vstack((i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25 ))
-	np.savetxt("ind.csv", indicators.T, delimiter=",", header = 'RSI,MACD,MACD,MACD,WILLR,STOCH,STOCH,STOCHRSI,STOCHRSI,CCI,ROC,OBV,AD,MOM,SMA,WMA,EMA,TSF,BBANDS,BBANDS,BBANDS,TEMA,ADX,MFI,ATR')
+	indicators = np.vstack((i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26,i27,i28,i29,i30))
+	np.savetxt("ind.csv", indicators.T, delimiter=",", header = 'RSI,MACD,MACD,MACD,WILLR,STOCH,STOCH,STOCHRSI,STOCHRSI,CCI,ROC,OBV,AD,MOM,SMA,WMA,EMA,TSF,BBANDS,BBANDS,BBANDS,TEMA,ADX,MFI,ATR,DS5,DS10,DW5,DW10,OCRSI')
 	
 	#saving all the actual and quantized values of actual yoc and ycc
 	np.savetxt("out.csv", out.T, delimiter=",")
 	
-	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,ypast,yoc_oc,indicators,out)).T
-	array_oc = pandas.DataFrame(array_oc)
+	head = ['date','day','o_yday','h_yday','l_yday','c_yday','v_yday','o_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','yoc_abs','yoc2','yoc1']	
+	#print len(head)
+	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,ypast,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
+	array_oc = pandas.DataFrame(np.vstack((head,array_oc)))
 	
-	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,ypast,yoc_cc,indicators,out)).T
-	array_cc = pandas.DataFrame(array_cc)
+	head = ['date','day','o_tday','h_tday','l_tday','c_tday','v_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','yoc_abs','yoc2','yoc1','ycc1_abs','ycc1_qnt','ycc1_sgn','ycc2_abs','ycc2_qnt','ycc2_sgn','ycc3_abs','ycc3_qnt','ycc3_sgn','ycc4_abs','ycc4_qnt','ycc4_sgn','ycc5_abs','ycc5_qnt','ycc5_sgn','ycc6_abs','ycc6_qnt','ycc6_sgn','ycc7_abs','ycc7_qnt','ycc7_sgn','ycc8_abs','ycc8_qnt','ycc8_sgn','ycc9_abs','ycc9_qnt','ycc9_sgn','ycc10_abs','ycc10_qnt','ycc10_sgn']	
+	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,ypast,y_hc,y_lc,yoc_cc,indicators,out)).T
+	array_cc = pandas.DataFrame(np.vstack((head,array_cc)))
+		
+	array_cc.to_csv('ycc.csv',index = False)
 	
-	head = ['0 : date','1 : day','2 : o','3 : h','4 : l','5 : c','6 : v','7 : l1','8 : l2','9 : l3','10 : l4','11 : l5','12 : l6','13 : l7','14 : l8','15 : l9','16 : l10','17 : yoc_past','18 : RSI','19 : MACD','20 : MACDsig','21 : MACDhist','22 : WILLR','23 : slowk','24 : slowd','25 : fastk','26 : fastd','27 : CCI','28 : ROC','29 : OBV','30 : AD','31 : MOM','32 : SMA','33 : WMA','34 : EMA','35 : TSF','36 : BBANDSu','37 : BBANDSm','38 : BBANDSl','39 : TEMA','40 : ADX','41 : MFI','42 : ATR','43 : yoc_actual','44 : yoc2','45 : yoc1','46 : ycc_a','47 : ycc2','48 : ycc1','49 : ycc_a','50 : ycc2','51 : ycc1','52 : ycc_a','53 : ycc2','54 : ycc1','55 : ycc_a','56 : ycc2','57 : ycc1','58 : ycc_a','59 : ycc2','60 : ycc1','61 : ycc_a','62 : ycc2','63 : ycc1','64 : ycc_a','65 : ycc2','66 : ycc1','67 : ycc_a','68 : ycc2','69 : ycc1','70 : ycc_a','71 : ycc2','72 : ycc1','73 : ycc_a','74 : ycc2','75 : ycc10']	#print len(head)
-	array_cc.to_csv('ycc.csv',header=head,index = False)
-	
-	head = ['0 : date','1 : day','2 : o','3 : h','4 : l','5 : c','6 : v','7 : o_','8 : l1','9 : l2','10 : l3','11 : l4','12 : l5','13 : l6','14 : l7','15 : l8','16 : l9','17 : l10','18 : yoc_past','19 : RSI','20 : MACD','21 : MACDsig','22 : MACDhist','23 : WILLR','24 : slowk','25 : slowd','26 : fastk','27 : fastd','28 : CCI','29 : ROC','30 : OBV','31 : AD','32 : MOM','33 : SMA','34 : WMA','35 : EMA','36 : TSF','37 : BBANDSu','38 : BBANDSm','39 : BBANDSl','40 : TEMA','41 : ADX','42 : MFI','43 : ATR','44 : yoc_actual','45 : yoc2','46 : yoc1','47 : ycc_a','48 : ycc2','49 : ycc1','50 : ycc_a','51 : ycc2','52 : ycc1','53 : ycc_a','54 : ycc2','55 : ycc1','56 : ycc_a','57 : ycc2','58 : ycc1','59 : ycc_a','60 : ycc2','61 : ycc1','62 : ycc_a','63 : ycc2','64 : ycc1','65 : ycc_a','66 : ycc2','67 : ycc1','68 : ycc_a','69 : ycc2','70 : ycc1','71 : ycc_a','72 : ycc2','73 : ycc1','74 : ycc_a','75 : ycc2','76 : ycc10']	
-	array_oc.to_csv('yoc.csv', header=head,index = False)
+	array_oc.to_csv('yoc.csv',index = False)
 
 #converts list of days to list of dates
 def day_to_date(date):
@@ -92,14 +100,14 @@ def day_to_date(date):
 
 #calculates the difference between today's opening and yesterday's closing
 def yocpast (opn, close):
-	close = np.hstack((0,close))
-	opn = np.hstack((opn,0))
-	return np.subtract(opn, close)[1:]
+	close = np.hstack((np.nan,close))
+	opn = np.hstack((opn,np.nan))
+	return np.divide(np.subtract(opn, close)[:-1],close[:-1])
 
 # calculates opening difference of 
 # (ith day in future) - (today)
 def yoc (opn, close):
-	return np.subtract(close, opn)
+	return np.divide(np.subtract(close, opn),opn)
 
 # calculates closing difference of 
 # (ith day in future) - (today)
@@ -108,9 +116,9 @@ def ycc (data, day_range):
 	out = data
 	length = len(data)
 	for i in range (1,day_range):
-		data = np.hstack((0,data))
-		nextData = np.hstack((nextData,0))
-		pred = nextData-data
+		data = np.hstack((np.nan,data))
+		nextData = np.hstack((nextData,np.nan))
+		pred = np.divide((nextData-data),data)
 		out = np.vstack((out,pred[i:]))
 	out = out[:,]
 	return out[1:,:]
@@ -120,9 +128,9 @@ def yccpast (data, day_range):
 	out = data
 	length = len(data)
 	for i in range (1,day_range):
-		data = np.hstack((data,0))
-		prevData = np.hstack((0,prevData))
-		pred = data - prevData
+		data = np.hstack((data,np.nan))
+		prevData = np.hstack((np.nan,prevData))
+		pred = np.divide((data - prevData),prevData)
 		out = np.vstack((out,pred[:-i]))
 	out = out[:,]
 	return out[1:,:]
@@ -160,6 +168,29 @@ def compute_labels (split, data):
 		if label == 0:
 			label = label -1
 	return out
+
+def OCRSI (opn, close, day_range):
+	gain_loss = close - opn
+	gain=[]
+	ret =[]
+	loss=[]
+	for i in gain_loss:
+		if i > 0:
+			gain.append(i)
+			loss.append(0)
+		else:
+			gain.append(0)
+			loss.append(-i)
+	ga = sum(gain[:day_range])/day_range
+	la = sum(loss[:day_range])/day_range
+	for i in range(len(gain)-day_range):
+		ga = (ga*(day_range-1)+gain[i])/day_range
+		la = (la*(day_range-1)+loss[i])/day_range
+		ret.append(100-100/(1+ga/la))
+	return [np.nan]*day_range+ret
+
+def DIS (close, ma):
+	return np.divide(close , ma)
 
 # Suggests the overbrought and oversold market signals
 # 100 - (100 / (1 + (sum_gains_n_days / sum_loss_n_days)))
