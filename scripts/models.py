@@ -5,7 +5,7 @@ import matplotlib
 import pandas
 import sklearn
 import pandas
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier, AdaBoostClassifier, ExtraTreesClassifier
 from sklearn.metrics import confusion_matrix
 
 from os import listdir
@@ -58,29 +58,51 @@ def AllModels (file, in_columns, out_columns):
 	predictions = rf.predict (X_validation)
 	print 'DF : ' +str(accuracy_score(Y_validation, predictions))
 
-	nb = GaussianNB()
+	'''nb = GaussianNB()
 	nb.fit(X_train, Y_train)
 	predictions = nb.predict (X_validation)
 	print 'NB : '+str(accuracy_score(Y_validation, predictions))	
 
 	svm = SVC()
-	svm.fit(X_train, Y_train)
-	predictions = svm.predict (X_validation)
-	print 'SVM: '+str(accuracy_score(Y_validation, predictions))	
+				svm.fit(X_train, Y_train)
+				predictions = svm.predict (X_validation)
+				print 'SVM: '+str(accuracy_score(Y_validation, predictions))	
+				'''
 	print '--------------------'
+	rf=RandomForestClassifier(n_estimators=300, criterion='gini', max_depth=None,
+	 					min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
+						 max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, 
+	 					min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, 
+	 					random_state=None, verbose=0, warm_start=False, class_weight=None)
+	rf.fit(X_train, Y_train)
+	print(rf.score(X_validation,Y_validation))
+	et=ExtraTreesClassifier(n_estimators=75, criterion='gini', max_depth=None, min_samples_split=2, 
+						min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto', 
+						max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, 
+						bootstrap=False, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
+						warm_start=False, class_weight=None)
+	et.fit(X_train, Y_train)
+	print(et.score(X_validation,Y_validation))
+	#cnf_matrix = confusion_matrix(Y_validation, y_pred)
+	#print cnf_matrix
+	
 	rf = []
-	for i in range(5,11):
-		rf.append(RandomForestClassifier(n_estimators=i*15, criterion='gini', max_depth=None,
-     					min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
-    					 max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, 
-     					min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, 
-     					random_state=None, verbose=0, warm_start=False, class_weight=None))
+
+	for i in range(1,5):
+		rf.append(ExtraTreesClassifier(n_estimators=300, criterion='gini', max_depth=None, min_samples_split=2, 
+						min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=i*12, 
+						max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, 
+						bootstrap=False, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
+						warm_start=False, class_weight=None))
 		#cnf_matrix = confusion_matrix(Y_validation, y_pred)
 		#print cnf_matrix
 	l = []
 	for i in range(len(rf)):
 		l.append((str(i),rf[i]))
-	ecl = VotingClassifier(estimators=l, voting='hard')
+	l.append(('a',lda))
+	l.append(('b',lda))
+	ecl = VotingClassifier(estimators = l, voting = 'hard')
+#	ecl = AdaBoostClassifier(base_estimator = rf[0])
 	ecl.fit(X_train, Y_train)
 	print accuracy_score(Y_validation, ecl.predict(X_validation))
 
