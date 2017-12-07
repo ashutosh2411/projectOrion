@@ -8,9 +8,8 @@ from os.path import isfile, join
 from sklearn import svm
 import pandas
 
-def main():
-	only_csv_files = [f for f in listdir('../datasets_raw') if isfile(join('../datasets_raw', f)) and f.endswith('.csv')]
-	in_address = 'ICICIBANK.csv'
+def main(var):
+	in_address = 'NIFTY-I.csv'
 	dataset = pandas.read_csv(in_address)
 	data = dataset.values
 	date_ycc = data[:,0]
@@ -25,7 +24,8 @@ def main():
 	l = np.array(list(data[:,2]))
 	c = np.array(list(data[:,3]))
 	v = np.array(list(data[:,4]))
-	o_ = np.hstack((o[1:],0))
+	o_ = np.hstack((o[1:],np.nan))
+	c_ = np.hstack((c[1:],np.nan))
 	v = v.astype(float)
 	y = ycc(c,11) 
 	y_hc = yoc(c,h)
@@ -41,27 +41,38 @@ def main():
 		out = np.vstack((out, compute_labels(split, y[i])))
 		split = calculate_percentile(y[i],1)
 		out = np.vstack((out, compute_labels(split, y[i])))
-	t1 = yoc(o,c)
-	t2 = compute_labels(calculate_percentile(yoc(o,c),2),yoc(o,c))
-	t3 = compute_labels(calculate_percentile(yoc(o,c),1),yoc(o,c))
+	t1 = np.hstack((yoc(o,c)[1:],np.nan))
+	t2 = np.hstack((compute_labels(calculate_percentile(yoc(o,c),2),yoc(o,c))[1:],np.nan))
+	t3 = np.hstack((compute_labels(calculate_percentile(yoc(o,c),1),yoc(o,c))[1:],np.nan))
 
 	out = np.vstack((t1,t2,t3,out[1:]))
-	i1 = RSI (c,14)
+	i1 = RSI (c,var*7)
 	
 	i2, i3, i4 = MACD (c,12,26,9)
-	i5 = WILLR (h,l,c,14)
+	i5 = WILLR (h,l,c,var*7)
 	i6, i7 = STOCH(h,l,c,5,3,0,3,0)
 	i8, i9 = STOCHRSI(c,14,5,3,0)
-	i10 = CCI (h,l,c,20)
-	i11 = ROC (c,12)
+	i10 = CCI (h,l,c,var*10)
+	i11 = ROC (c,var*6)
 	i12 = OBV (c,v)
 	i13 = AD (h,l,c,v)
-	i14 = MOM (c,5)
-	i15 = SMA (c,5)
-	i16 = WMA (c,5)
-	i17 = EMA (c,12)
-	i18 = TSF (c,10)
+	i14 = MOM (c,var*5)
+	i15 = SMA (c,var*5)
+	i16 = WMA (c,var*5)
+	i17 = EMA (c,var*6)
+	i18 = TSF (c,var*5)
 	i19, i20, i21 = BBANDS(c,20,2,2,0)
+<<<<<<< HEAD
+	i22 = TEMA(c,var*5)
+	i23 = ADX (h,l,c,var*7)
+	i24 = MFI (h,l,c,v,var*7)
+	i25 = ATR (h,l,c,var*7)
+	i26 = DIS(c,SMA(c,var*5))
+	i27 = DIS(c,SMA(c,var*5))
+	i28 = DIS(c,WMA(c,var*5))
+	i29 = DIS(c,WMA(c,var*5))
+	i30 = OCRSI(o,c,var*7)
+=======
 	i22 = TEMA(c,10)
 	i23 = ADX (h,l,c,14)
 	i24 = MFI (h,l,c,v,14)
@@ -71,6 +82,7 @@ def main():
 	i28 = DIS(c,WMA(c,5))
 	i29 = DIS(c,WMA(c,10))
 	i30 = OCRSI(o,c,14)
+>>>>>>> 475829c76b50fd6396ad7dabe99c7a73630eb544
 	#saving indicators to ind.csv
 	indicators = np.vstack((i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26,i27,i28,i29,i30))
 	np.savetxt("ind.csv", indicators.T, delimiter=",", header = 'RSI,MACD,MACD,MACD,WILLR,STOCH,STOCH,STOCHRSI,STOCHRSI,CCI,ROC,OBV,AD,MOM,SMA,WMA,EMA,TSF,BBANDS,BBANDS,BBANDS,TEMA,ADX,MFI,ATR,DS5,DS10,DW5,DW10,OCRSI')
@@ -78,13 +90,12 @@ def main():
 	#saving all the actual and quantized values of actual yoc and ycc
 	np.savetxt("out.csv", out.T, delimiter=",")
 	
-	head = ['date','day','o_yday','h_yday','l_yday','c_yday','v_yday','o_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','yoc_abs','yoc2','yoc1']	
-	#print len(head)
-	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,ypast,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
+	head = ['date','day','o_yday','h_yday','l_yday','c_yday','v_yday','o_tday','c_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','yoc_abs','yoc_qnt','yoc_sgn']	
+	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,c_,ypast,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
 	array_oc = pandas.DataFrame(np.vstack((head,array_oc)))
 	
-	head = ['date','day','o_tday','h_tday','l_tday','c_tday','v_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','yoc_abs','yoc2','yoc1','ycc1_abs','ycc1_qnt','ycc1_sgn','ycc2_abs','ycc2_qnt','ycc2_sgn','ycc3_abs','ycc3_qnt','ycc3_sgn','ycc4_abs','ycc4_qnt','ycc4_sgn','ycc5_abs','ycc5_qnt','ycc5_sgn','ycc6_abs','ycc6_qnt','ycc6_sgn','ycc7_abs','ycc7_qnt','ycc7_sgn','ycc8_abs','ycc8_qnt','ycc8_sgn','ycc9_abs','ycc9_qnt','ycc9_sgn','ycc10_abs','ycc10_qnt','ycc10_sgn']	
-	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,ypast,y_hc,y_lc,yoc_cc,indicators,out)).T
+	head = ['date','day','o_tday','h_tday','l_tday','c_tday','v_tday','yoc_abs','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','ycc1_abs','ycc1_qnt','ycc1_sgn','ycc2_abs','ycc2_qnt','ycc2_sgn','ycc3_abs','ycc3_qnt','ycc3_sgn','ycc4_abs','ycc4_qnt','ycc4_sgn','ycc5_abs','ycc5_qnt','ycc5_sgn','ycc6_abs','ycc6_qnt','ycc6_sgn','ycc7_abs','ycc7_qnt','ycc7_sgn','ycc8_abs','ycc8_qnt','ycc8_sgn','ycc9_abs','ycc9_qnt','ycc9_sgn','ycc10_abs','ycc10_qnt','ycc10_sgn']	
+	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,yoc(o,c),ypast,y_hc,y_lc,yoc_cc,indicators,out[3:])).T
 	array_cc = pandas.DataFrame(np.vstack((head,array_cc)))
 		
 	array_cc.to_csv('ycc.csv',index = False)
@@ -319,4 +330,4 @@ def ATR (high, low, close, timeperiod=14):
 	real_ = ta.ATR(high, low, close, timeperiod=14)
 	return real_
 
-main()
+main(1)
