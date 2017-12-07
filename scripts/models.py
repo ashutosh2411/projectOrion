@@ -28,7 +28,7 @@ def AllModels (file, in_columns, out_columns):
 	print(array.shape)
 	X = array[50:-50,in_columns]
 	Y = array[50:-50,out_columns]
-	print Y
+#	print Y
 	
 	validation_size = 0.2
 	seed =0
@@ -68,24 +68,24 @@ def AllModels (file, in_columns, out_columns):
 	predictions = svm.predict (X_validation)
 	print 'SVM: '+str(accuracy_score(Y_validation, predictions))	
 	print '--------------------'
-	for i in range(5):
-		rf = RandomForestClassifier(n_estimators=80, criterion='gini', max_depth=None,
+	rf = []
+	for i in range(5,11):
+		rf.append(RandomForestClassifier(n_estimators=i*15, criterion='gini', max_depth=None,
      					min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
     					 max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, 
      					min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, 
-     					random_state=None, verbose=0, warm_start=False, class_weight=None)
-		rf.fit(X_train, Y_train)
-		y_pred=rf.predict(X_validation)
-		predictions = rf.score (X_validation,Y_validation)
-		print 'RF : '+str(i) +' : '+str(predictions)
+     					random_state=None, verbose=0, warm_start=False, class_weight=None))
 		#cnf_matrix = confusion_matrix(Y_validation, y_pred)
 		#print cnf_matrix
-	ecl = VotingClassifier(estimators=[('lr', lr),('a', knn),('r', lda),('l', nb), ('rf', svm),('lda',rf)], voting='hard')
+	l = []
+	for i in range(len(rf)):
+		l.append((str(i),rf[i]))
+	ecl = VotingClassifier(estimators=l, voting='hard')
 	ecl.fit(X_train, Y_train)
 	print accuracy_score(Y_validation, ecl.predict(X_validation))
 
-in_columns  = range(2,7)+range(9,51)
-out_columns = [62]
+in_columns  = range(2,51)
+out_columns = [55]
 
 x_address = 'ycc.csv'
 
