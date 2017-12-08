@@ -13,10 +13,10 @@ def main() :
     
     #calculating relative strength index
     feature_matrix =[]
-    for i in range(1,4) :
-        feature_matrix.append( rsi(5*i)) 
+    #for i in range(1,4) :
+     #   feature_matrix.append( rsi(5*i)) 
     
-        Ytr = []
+    Ytr = []
     opening = []
     closing = []
     high    = []
@@ -45,7 +45,7 @@ def main() :
    
     #calculating stochastic oscillator indicator for last 14 days
     feature_matrix.append(stochastic_osci())
-    feature_matrix.append(rsi(10))
+    #feature_matrix.append(rsi(10))
     #calculating william indicator for last 14 days
     feature_matrix.append(william())
     
@@ -74,21 +74,36 @@ def main() :
     feature_matrix = np.array(feature_matrix)
     feature_matrix = feature_matrix.T
 
+    np.savetxt("out.csv", feature_matrix, delimiter=",")
 
-    clf = svm.SVC()
+
+    #clf = svm.SVC()
     
-    clf.fit(feature_matrix[:200], Ytr[:200])
+    #clf.fit(feature_matrix[:2000], Ytr[:2000])
 
     classifier = RandomForestClassifier(n_estimators=80, criterion='gini', max_depth=None,
      					min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
     					 max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, 
      					min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, 
      					random_state=None, verbose=0, warm_start=False, class_weight=None)
-    classifier.fit(feature_matrix[:200], Ytr[:200])
+    classifier.fit(feature_matrix[:2000], Ytr[:2000])
 
-    print(classifier.score(feature_matrix[200:],Ytr[200:]))
-    print(clf.score(feature_matrix[200:],Ytr[200:]))
+    print(classifier.score(feature_matrix[2000:],Ytr[2000:]))
+    s = 0
+    for i in range(25):
+        s = s + rf(feature_matrix,Ytr,i+1)
+    print 'avg: '+str(s/25)
+   # print(clf.score(feature_matrix[2000:],Ytr[2000:]))
 
+def rf(feature_matrix, Ytr, i):
+    classifier = RandomForestClassifier(n_estimators=10*i, criterion='gini', max_depth=None,
+                        min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
+                         max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, 
+                        min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, 
+                        random_state=None, verbose=0, warm_start=False, class_weight=None)
+    classifier.fit(feature_matrix[:2000], Ytr[:2000])
+
+    return(classifier.score(feature_matrix[2000:],Ytr[2000:]))
 
 ################################################################################
 def rsi(days) :
@@ -96,7 +111,7 @@ def rsi(days) :
     profit = 0 
     loss = 0 
     # calculating for first days(5,10,15)
-    for i in data  :
+    for i in data[:days]  :
         if( i[2] - i[5] >0) :
             loss +=i[2] - i[5]
         else :
@@ -129,10 +144,8 @@ def stochastic_osci() :
     for i in range(14, len(data)) :
         numerator = data[i][5]-min(data[i-14:i,4])
         denominator = max(data[i-14:i ,3])-min(data[i-14:i,4])
-                                   
-        
         sOindicator.append(numerator/denominator*100)
-    sOindicator = sOindicator[1:]   
+    sOindicator = sOindicator[:-1]   
     return sOindicator 
 
 ##########################################################################
@@ -144,7 +157,7 @@ def william() :
                                    
         
         williamIndicator.append(numerator/denominator*(-100))
-    williamIndicator = williamIndicator[1:]   
+    williamIndicator = williamIndicator[:-1]   
     return williamIndicator
 
 ##########################################################################
@@ -153,7 +166,7 @@ def price_rate_change(days) :
     for i in range(days, len(data)) :
         indicator.append((data[i][5] - data[i-days +1 ][5])/data[i-days +1][5] )
     if days == 5 :
-    	  indicator = indicator[10:]
+    	  indicator = indicator[9:-1]
     return indicator 
 
 
@@ -170,7 +183,7 @@ def on_balance_volume() :
             indicator.append(obv)
         else :
             indicator.append(obv)
-    indicator = indicator[15:]    
+    indicator = indicator[14:-1]    
     return indicator 
 
 ##########################################################################
@@ -178,11 +191,11 @@ def simple_moving_average(days) :
     indicator = []
     for i in range(days, len(data)) :
         
-        indicator.append(sum(data[i-days +1 :i+1,5])/days)
+        indicator.append(sum(data[i-days +1 :i,5])/days)
     if days == 5 :
-    	  indicator = indicator[10:]
+    	  indicator = indicator[9:-1]
     elif days == 10 :
-    	  indicator = indicator[5:]   
+    	  indicator = indicator[4:-1]   
     return indicator
 
 
@@ -191,16 +204,16 @@ def simple_moving_average(days) :
 def weighed_moving_average(days) :
     indicator = []
     li =[]
-    for i in range(days):
+    for i in range(days-1):
         li.append(days-i)
     li = np.asarray(li)
     for i in range(days, len(data)) :
-        x = np.dot(data[i-days + 1:i+1,5],li)
+        x = np.dot(data[i-days + 1:i,5],li)
         indicator.append(float(x)/sum(li))
     if days == 5 :
-    	  indicator = indicator[10:]
+    	  indicator = indicator[9:-1]
     elif days == 10 :
-    	  indicator = indicator[5:]    
+    	  indicator = indicator[4:-1]    
     return indicator
 
 ##########################################################################
@@ -209,8 +222,8 @@ def stochastic_d(days):
     li = stochastic_osci() 
     indicator = []
     for i in range(days,len(data)) :
-        indicator.append(sum(li[i-days+1: i +1])/days)
-    indicator = indicator[10:]
+        indicator.append(sum(li[i-days+1: i ])/days)
+    indicator = indicator[9:-1]
     return indicator 
 
 ##########################################################################
@@ -219,12 +232,12 @@ def exponential_moving_aver(days):
     indicator = []
     alpha = 2/float(1+days)
     li =[ alpha ]
-    for i in range(1,days) :
+    for i in range(1,days-1) :
         li.append(pow((1-alpha),i))    
     for i in range(days,len(data)) :    
-        indicator.append( np.dot(li , data[i-days+1:i+1,5])/sum(li))
+        indicator.append( np.dot(li , data[i-days+1:i,5])/sum(li))
     if days == 10 :
-    	  indicator = indicator[5:]
+    	  indicator = indicator[4:-1]
     return indicator 
 
 
