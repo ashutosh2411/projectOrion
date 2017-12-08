@@ -24,7 +24,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 
 def AllModels (file, in_columns, out_columns):		
-	data = numpy.genfromtxt("ycc.csv" ,delimiter="," , autostrip = True )
+	data = numpy.genfromtxt(file ,delimiter="," , autostrip = True )
 	data = data[2:]
 	array = data
 #	print(array.shape)
@@ -33,10 +33,9 @@ def AllModels (file, in_columns, out_columns):
 #	print Y
 	
 	validation_size = 0.2
-	seed =0
 	#scoring = 'accuracy'
 
-	X_train, X_validation, Y_train, Y_validation = model_selection.train_test_split(X, Y, test_size=validation_size, random_state=seed)
+	X_train, X_validation, Y_train, Y_validation = model_selection.train_test_split(X, Y, test_size=validation_size)
 
 #	X_train = SelectKBest( k=107).fit_transform(X_train, Y_train)
 #	print X_train.pvalues_()
@@ -60,7 +59,7 @@ def AllModels (file, in_columns, out_columns):
 	rf = DecisionTreeClassifier()
 	rf.fit(X_train, Y_train)
 	predictions = rf.predict (X_validation)
-	print 'DF : ' +str(accuracy_score(Y_validation, predictions))
+	print 'DT : ' +str(accuracy_score(Y_validation, predictions))
 
 	nb = GaussianNB()
 	nb.fit(X_train, Y_train)
@@ -80,7 +79,7 @@ def AllModels (file, in_columns, out_columns):
 		 					random_state=None, verbose=0, warm_start=False, class_weight=None)
 	rf.fit(X_train, Y_train)
 	print 'rf: '+str(rf.score(X_validation,Y_validation))
-	et=ExtraTreesClassifier(n_estimators=75, criterion='gini', max_depth=None, min_samples_split=2, 
+	et=ExtraTreesClassifier(n_estimators=300, criterion='gini', max_depth=None, min_samples_split=2, 
 						min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto', 
 						max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, 
 						bootstrap=False, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
@@ -93,10 +92,10 @@ def AllModels (file, in_columns, out_columns):
 
 	rf = []
 
-	for i in range(1,20):
-		rf.append(RandomForestClassifier(n_estimators=75, criterion='gini', max_depth=None,
+	for i in range(1,5):
+		rf.append(ExtraTreesClassifier(n_estimators=300, criterion='gini', max_depth=None,
 		 					min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
-							 max_features=50, max_leaf_nodes=None, min_impurity_decrease=0.0, 
+							 max_features=i*12, max_leaf_nodes=None, min_impurity_decrease=0.0, 
 		 					min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, 
 		 					random_state=None, verbose=0, warm_start=False, class_weight=None))
 		#cnf_matrix = confusion_matrix(Y_validation, y_pred)
@@ -107,7 +106,8 @@ def AllModels (file, in_columns, out_columns):
 	lda = LinearDiscriminantAnalysis()
 	l.append(('a',lda))
 	l.append(('b',lda))
-	l.append(('c',nb))
+	l.append(('c',lda))
+	l.append(('d',lda))
 	ecl = VotingClassifier(estimators = l, voting = 'hard')
 #	ecl = AdaBoostClassifier(base_estimator = rf[0])
 	ecl.fit(X_train, Y_train)
@@ -130,14 +130,14 @@ def AllModels (file, in_columns, out_columns):
 	
 
 
-in_columns  = range(2,109)
-out_columns = [110]
-
-x_address = 'ycc.csv'
+in_columns  = range(2,51)
+out_columns = [53]
+filename = 'ICICIBANK'
+x_address = filename+'_ycc.csv'
 s = 0.0
-for i in range(1):
+for i in range(25):
 	s = s + AllModels(x_address, in_columns, out_columns)
-
+print 'avg: '+str(s/25)
 
 
 

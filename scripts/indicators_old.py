@@ -9,7 +9,8 @@ from sklearn import svm
 import pandas
 
 def main(var):
-	in_address = 'NIFTY-I.csv'
+	filename = 'ICICIBANK'
+	in_address = filename+'.csv'
 	dataset = pandas.read_csv(in_address)
 	data = dataset.values
 	date_ycc = data[:,0]
@@ -25,7 +26,7 @@ def main(var):
 	c = np.array(list(data[:,3]))
 	v = np.array(list(data[:,4]))
 	o_ = np.hstack((o[1:],np.nan))
-	c_ = np.hstack((c[1:],np.nan))
+#	c_ = np.hstack((c[1:],np.nan))
 	v = v.astype(float)
 	y = ycc(c,11) 
 	y_hc = yoc(c,h)
@@ -62,7 +63,6 @@ def main(var):
 	i17 = EMA (c,var*6)
 	i18 = TSF (c,var*5)
 	i19, i20, i21 = BBANDS(c,20,2,2,0)
-<<<<<<< HEAD
 	i22 = TEMA(c,var*5)
 	i23 = ADX (h,l,c,var*7)
 	i24 = MFI (h,l,c,v,var*7)
@@ -72,17 +72,7 @@ def main(var):
 	i28 = DIS(c,WMA(c,var*5))
 	i29 = DIS(c,WMA(c,var*5))
 	i30 = OCRSI(o,c,var*7)
-=======
-	i22 = TEMA(c,10)
-	i23 = ADX (h,l,c,14)
-	i24 = MFI (h,l,c,v,14)
-	i25 = ATR (h,l,c,10)
-	i26 = DIS(c,SMA(c,5))
-	i27 = DIS(c,SMA(c,10))
-	i28 = DIS(c,WMA(c,5))
-	i29 = DIS(c,WMA(c,10))
-	i30 = OCRSI(o,c,14)
->>>>>>> 475829c76b50fd6396ad7dabe99c7a73630eb544
+
 	#saving indicators to ind.csv
 	indicators = np.vstack((i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26,i27,i28,i29,i30))
 	np.savetxt("ind.csv", indicators.T, delimiter=",", header = 'RSI,MACD,MACD,MACD,WILLR,STOCH,STOCH,STOCHRSI,STOCHRSI,CCI,ROC,OBV,AD,MOM,SMA,WMA,EMA,TSF,BBANDS,BBANDS,BBANDS,TEMA,ADX,MFI,ATR,DS5,DS10,DW5,DW10,OCRSI')
@@ -90,17 +80,19 @@ def main(var):
 	#saving all the actual and quantized values of actual yoc and ycc
 	np.savetxt("out.csv", out.T, delimiter=",")
 	
-	head = ['date','day','o_yday','h_yday','l_yday','c_yday','v_yday','o_tday','c_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','yoc_abs','yoc_qnt','yoc_sgn']	
-	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,c_,ypast,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
+#	head = ['date','day','o_yday','h_yday','l_yday','c_yday','v_yday','o_tday','c_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','yoc_abs','yoc_qnt','yoc_sgn']	
+#	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,c_,ypast,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
+	head = ['date','day','o_yday','h_yday','l_yday','c_yday','v_yday','o_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','yoc_abs','yoc_qnt','yoc_sgn']	
+	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,ypast,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
 	array_oc = pandas.DataFrame(np.vstack((head,array_oc)))
 	
 	head = ['date','day','o_tday','h_tday','l_tday','c_tday','v_tday','yoc_abs','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8','lag_9','lag_10','yhc','ylc','yoc_past','RSI','MACD','MACDsig','MACDhist','WILLR','slowk','slowd','fastk','fastd','CCI','ROC','OBV','AD','MOM','SMA','WMA','EMA','TSF','BBANDSu','BBANDSm','BBANDSl','TEMA','ADX','MFI','ATR','DS5','DS10','DW5','DW10','OCRSI','ycc1_abs','ycc1_qnt','ycc1_sgn','ycc2_abs','ycc2_qnt','ycc2_sgn','ycc3_abs','ycc3_qnt','ycc3_sgn','ycc4_abs','ycc4_qnt','ycc4_sgn','ycc5_abs','ycc5_qnt','ycc5_sgn','ycc6_abs','ycc6_qnt','ycc6_sgn','ycc7_abs','ycc7_qnt','ycc7_sgn','ycc8_abs','ycc8_qnt','ycc8_sgn','ycc9_abs','ycc9_qnt','ycc9_sgn','ycc10_abs','ycc10_qnt','ycc10_sgn']	
 	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,yoc(o,c),ypast,y_hc,y_lc,yoc_cc,indicators,out[3:])).T
 	array_cc = pandas.DataFrame(np.vstack((head,array_cc)))
 		
-	array_cc.to_csv('ycc.csv',index = False)
+	array_cc.to_csv(filename + '_ycc.csv',index = False)
 	
-	array_oc.to_csv('yoc.csv',index = False)
+	array_oc.to_csv(filename + '_yoc.csv',index = False)
 
 #converts list of days to list of dates
 def day_to_date(date):

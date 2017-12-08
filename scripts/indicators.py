@@ -9,7 +9,7 @@ from sklearn import svm
 import pandas
 
 def main(var):
-	in_address = 'NIFTY-I.csv'
+	in_address = 'NIFTY.csv'
 	dataset = pandas.read_csv(in_address)
 	data = dataset.values
 	date_ycc = data[:,0]
@@ -75,52 +75,52 @@ def main(var):
 	names.append('bband m')
 	i.append( BBANDS(c,20,2,2,0)[2])
 	names.append('bband l')
-	for j in range(1,5):
+	for var in range(1,5):
 		i.append( RSI (c,var*5))
-		names.append('rsi'+str(j))
+		names.append('rsi'+str(var))
 		i.append( WILLR (h,l,c,var*5))
-		names.append('willr'+str(j))
+		names.append('willr'+str(var))
 		i.append( CCI (h,l,c,var*10))
-		names.append('cci'+str(j))
+		names.append('cci'+str(var))
 		i.append( ROC (c,var*5))
-		names.append('roc'+str(j))
+		names.append('roc'+str(var))
 		i.append( MOM (c,var*5))
-		names.append('mom'+str(j))
+		names.append('mom'+str(var))
 		i.append( SMA (c,var*5))
-		names.append('sma'+str(j))
+		names.append('sma'+str(var))
 		i.append( WMA (c,var*5))
-		names.append('wma'+str(j))
+		names.append('wma'+str(var))
 		i.append( EMA (c,var*5))
-		names.append('ema'+str(j))
+		names.append('ema'+str(var))
 		i.append( TSF (c,var*5))
-		names.append('tsf'+str(j))
+		names.append('tsf'+str(var))
 		i.append( TEMA(c,var*5))
-		names.append('tema'+str(j))
+		names.append('tema'+str(var))
 		i.append( ADX (h,l,c,var*5))
-		names.append('adx'+str(j))
+		names.append('adx'+str(var))
 		i.append( MFI (h,l,c,v,var*5))
-		names.append('mfi'+str(j))
+		names.append('mfi'+str(var))
 		i.append( ATR (h,l,c,var*5))
-		names.append('atr'+str(j))
+		names.append('atr'+str(var))
 		i.append( DIS(c,SMA(c,var*5)))
-		names.append('disS'+str(j))
+		names.append('disS'+str(var))
 		i.append( DIS(c,WMA(c,var*5)))
-		names.append('disW'+str(j))
+		names.append('disW'+str(var))
 		i.append( OCRSI(o,c,var*5))
-		names.append('ocrsi'+str(j))
-	for j in range(1,3):
+		names.append('ocrsi'+str(var))
+	for var in range(1,3):
 		i.append( RSI (c,var*7))
-		names.append('rsi7'+str(j))
+		names.append('rsi7'+str(var))
 		i.append( WILLR (h,l,c,var*7))
-		names.append('will7'+str(j))
+		names.append('will7'+str(var))
 		i.append( ADX (h,l,c,var*7))
-		names.append('adx7'+str(j))
+		names.append('adx7'+str(var))
 		i.append( MFI (h,l,c,v,var*7))
-		names.append('mfi7'+str(j))
+		names.append('mfi7'+str(var))
 		i.append( ATR (h,l,c,var*7))
-		names.append('atr7'+str(j))
+		names.append('atr7'+str(var))
 		i.append( OCRSI(o,c,var*7))
-		names.append('ocrsi7'+str(j))
+		names.append('ocrsi7'+str(var))
 #saving indicators to ind.csv
 	indicators = np.asarray(i)
 	np.savetxt("ind.csv", indicators, delimiter=",")
@@ -295,6 +295,7 @@ def ROC (close, timeperiod=10):
 # Relates trading volume to price change
 # OBV(t)=OBV(t-1)+/-Volume(t)
 def OBV (close, volume):
+	print volume
 	# ON BALANCE VOLUME
 	real_ = ta.OBV(close, volume)
 	return real_
