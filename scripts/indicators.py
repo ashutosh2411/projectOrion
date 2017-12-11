@@ -8,8 +8,8 @@ from os.path import isfile, join
 from sklearn import svm
 import pandas
 
-def main(var):
-	in_address = 'NIFTY.csv'
+def main(filename):
+	in_address = filename
 	dataset = pandas.read_csv(in_address)
 	data = dataset.values
 	date_ycc = data[:,0]
@@ -145,8 +145,8 @@ def main(var):
 	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,yoc(o,c),ypast,past_lag_nday,y_hc,y_lc,yoc_cc,indicators,out[3:])).T
 	array_cc = pandas.DataFrame(np.vstack((head,array_cc)))
 
-	array_cc.to_csv('ycc.csv',index = False)
-	array_oc.to_csv('yoc.csv',index = False)
+	array_cc.to_csv(filename[:-4] + '_ycc.csv',index = False)
+	array_oc.to_csv(filename[:-4] + '_yoc.csv',index = False)
 
 #converts list of days to list of dates
 def day_to_date(date):
@@ -409,4 +409,5 @@ def ATR (high, low, close, timeperiod=14):
 	real_ = ta.ATR(high, low, close, timeperiod)
 	return real_
 
-main(1)
+filename = 'ICICIBANK.csv'
+main(filename)
