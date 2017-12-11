@@ -365,7 +365,7 @@ def MFI (high, low, close, volume, timeperiod=14):
 # Shows volatality of market
 def ATR (high, low, close, timeperiod=14):
 	# AVERAGE TRUE RANGE
-	real_ = ta.ATR(high, low, close, timeperiod=14)
+	real_ = ta.ATR(high, low, close, timeperiod)
 	return real_
 
 main(1)
