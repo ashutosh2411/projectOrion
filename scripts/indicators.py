@@ -44,6 +44,9 @@ def main(var):
 		out = np.vstack((out, compute_labels(split, y[i])))
 		split = calculate_percentile(y[i],3)
 		out = np.vstack((out, compute_labels(split, y[i])))
+
+	past_lag_nday = past_lag(ypast[0],10).T
+
 	t1 = np.hstack((yoc(o,c)[1:],np.nan))
 	t2 = np.hstack((compute_labels(calculate_percentile(yoc(o,c),2),yoc(o,c))[1:],np.nan))
 	t3 = np.hstack((compute_labels(calculate_percentile(yoc(o,c),1),yoc(o,c))[1:],np.nan))
@@ -57,6 +60,8 @@ def main(var):
 	names.append('MACDsig')
 	i.append( MACD (c,12,26,9)[2])
 	names.append('MACDhist')
+	i.append(MACD (c,12,26,9)[3])
+	names.append('MACDhist_past')
 	i.append( STOCH(h,l,c,5,3,0,3,0)[0])
 	names.append('slowk')
 	i.append( STOCH(h,l,c,5,3,0,3,0)[1])
@@ -91,11 +96,11 @@ def main(var):
 		i.append( WMA (c,var*5))
 		names.append('wma'+str(var))
 		i.append( EMA (c,var*5))
-		names.append('ema'+str(var))
+		names.append('ema_fast ='+str(var))
 		i.append( TSF (c,var*5))
 		names.append('tsf'+str(var))
 		i.append( TEMA(c,var*5))
-		names.append('tema'+str(var))
+		names.append('tema_fast ='+str(var))
 		i.append( ADX (h,l,c,var*5))
 		names.append('adx'+str(var))
 		i.append( MFI (h,l,c,v,var*5))
@@ -129,13 +134,15 @@ def main(var):
 	np.savetxt("out.csv", out.T, delimiter=",")
 	
 	head = ['date','day','o_yday','h_yday','l_yday','c_yday','v_yday','o_tday','c_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7',
-		'lag_8','lag_9','lag_10','yhc','ylc','yoc_past']+names+['yoc_abs','yoc_qnt','yoc_sgn']	
-	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,c_,ypast,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
+		'lag_8','lag_9','lag_10','lag_1_p','lag_2_p','lag_3_p','lag_4_p','lag_5_p','lag_6_p','lag_7_p',
+		'lag_8_p','lag_9_p','lag_10_p','yhc','ylc','yoc_past']+names+['yoc_abs','yoc_qnt','yoc_sgn']	
+	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,c_,ypast,past_lag_nday,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
 	array_oc = pandas.DataFrame(np.vstack((head,array_oc)))
 	out_names = ['ycc1_abs','ycc1_sign','ycc1_qnt2','ycc1_qnt3','ycc2_abs','ycc2_sign','ycc2_qnt2','ycc2_qnt3','ycc3_abs','ycc3_sign','ycc3_qnt2','ycc3_qnt3','ycc4_abs','ycc4_sign','ycc4_qnt2','ycc4_qnt3','ycc5_abs','ycc5_sign','ycc5_qnt2','ycc5_qnt3','ycc6_abs','ycc6_sign','ycc6_qnt2','ycc6_qnt3','ycc7_abs','ycc7_sign','ycc7_qnt2','ycc7_qnt3','ycc8_abs','ycc8_sign','ycc8_qnt2','ycc8_qnt3','ycc9_abs','ycc9_sign','ycc9_qnt2','ycc9_qnt3','ycc10_abs','ycc10_sign','ycc10_qnt2','ycc10_qnt3','ycc15_abs','ycc15_sign','ycc15_qnt2','ycc15_qnt3','ycc20_abs','ycc20_sign','ycc20_qnt2','ycc20_qnt3','ycc30_abs','ycc30_sign','ycc30_qnt2','ycc30_qnt3']
 	head = ['date','day','o_tday','h_tday','l_tday','c_tday','v_tday','yoc_abs','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8'
-		,'lag_9','lag_10','yhc','ylc','yoc_past']+names+out_names
-	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,yoc(o,c),ypast,y_hc,y_lc,yoc_cc,indicators,out[3:])).T
+		,'lag_9','lag_10','lag_1_p','lag_2_p','lag_3_p','lag_4_p','lag_5_p','lag_6_p','lag_7_p',
+		'lag_8_p','lag_9_p','lag_10_p','yhc','ylc','yoc_past']+names+out_names
+	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,yoc(o,c),ypast,past_lag_nday,y_hc,y_lc,yoc_cc,indicators,out[3:])).T
 	array_cc = pandas.DataFrame(np.vstack((head,array_cc)))
 
 	array_cc.to_csv('ycc.csv',index = False)
@@ -171,6 +178,14 @@ def ycc (data, day_range):
 		pred = np.divide((nextData-data),data)
 		out = np.vstack((out,pred[i:]))
 	return out[1:,:]
+
+def past_lag(data, day_range):
+	data = np.hstack(([np.nan]*(day_range), data))
+	past_lag_list = [np.nan]*(day_range)
+	for i in range(len(data)-day_range):
+		x = data[i:i+day_range]
+		past_lag_list = np.vstack((past_lag_list, x[::-1]))
+	return past_lag_list[1:,:]
 
 def yccpast (data, day_range):
 	prevData = data
@@ -232,8 +247,8 @@ def OCRSI (opn, close, day_range):
 	ga = sum(gain[:day_range])/day_range
 	la = sum(loss[:day_range])/day_range
 	for i in range(len(gain)-day_range):
-		ga = (ga*(day_range-1)+gain[i])/day_range
-		la = (la*(day_range-1)+loss[i])/day_range
+		ga = (ga*(day_range-1)+gain[i + day_range])/day_range
+		la = (la*(day_range-1)+loss[i + day_range])/day_range
 		ret.append(100-100/(1+ga/la))
 	return [np.nan]*day_range+ret
 
@@ -251,8 +266,35 @@ def RSI (close, days):
 # EMA_fast - EMA_slow
 def MACD (close, fastperiod, slowperiod, signalperiod):
 	# MOVING AVERAGE CONVERGENCE DIVERGENCE
-	macd, macdsignal, macdhist = ta.MACD(np.array(close), fastperiod, slowperiod, signalperiod)
-	return macd, macdsignal, macdhist
+	macd = [np.nan]*len(close) 
+	macdsignal = [np.nan]*len(close)
+	macdhist = [np.nan]*len(close) 
+	ema_fast = EMA_new(close, fastperiod)
+	ema_slow = EMA_new(close, slowperiod)
+	for i in range(slowperiod-1,(len(close)-slowperiod)):
+		macd[i] = ema_fast[i] - ema_slow[i]
+
+	
+	i = signalperiod+slowperiod-2 
+	macdsignal[i] = sum(macd[slowperiod-1:i+1])/signalperiod
+	macdhist[i] = macd[i] - macdsignal[i]
+	
+	j = 0
+	for i in range(i + 1, (len(close)-slowperiod + signalperiod - 1)):
+		macdsignal[i] = macd[i-1]*2.0/(signalperiod+1) + macdsignal[i-1]*(1-2.0/(signalperiod+1))
+		macdhist[i] = macd[i] - macdsignal[i]
+		j = j + 1 
+	macdhist_p = np.hstack((np.nan,macdhist))[:-1]
+		#macd, macdsignal, macdhist = ta.MACD(np.array(close), fastperiod, slowperiod, signalperiod)
+	return macd, macdsignal, macdhist, macdhist_p
+
+#calculates ema
+def EMA_new(close, day_range):
+	ema_list = [np.nan]*len(close)
+	ema_list[day_range-1] = sum(close[:day_range])/day_range
+	for i in range(day_range,(len(close)-day_range)):
+		ema_list[i] = (close[i]*(2.0/(1+day_range)) + (ema_list[i-1]*(1-(2.0/(1+day_range)))))
+	return ema_list
 
 # Determines where today's closing price fell within the range on past n days transaction
 # (highest-closed)/(highest-lowest)*100
@@ -295,7 +337,6 @@ def ROC (close, timeperiod=10):
 # Relates trading volume to price change
 # OBV(t)=OBV(t-1)+/-Volume(t)
 def OBV (close, volume):
-	print volume
 	# ON BALANCE VOLUME
 	real_ = ta.OBV(close, volume)
 	return real_
@@ -365,7 +406,7 @@ def MFI (high, low, close, volume, timeperiod=14):
 # Shows volatality of market
 def ATR (high, low, close, timeperiod=14):
 	# AVERAGE TRUE RANGE
-	real_ = ta.ATR(high, low, close, timeperiod=14)
+	real_ = ta.ATR(high, low, close, timeperiod)
 	return real_
 
 main(1)
