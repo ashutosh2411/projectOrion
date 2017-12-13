@@ -1,5 +1,5 @@
 import numpy as np
-import math
+import pandas
 
 # importing models
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier, AdaBoostClassifier, ExtraTreesClassifier
@@ -25,25 +25,24 @@ from sklearn.decomposition import PCA
 
 #################################################################################################
 ################# CHANGES TO BE MADE ONLY IN FOLLOWING PART #####################################
-filename = '../scripts/AAPL_ycc.csv'
+filename = 'AAPL_2001_to_2017_ycc.csv'
 DO_PCA 					= 'n'
 SPLIT_RANDOM			= 'n'				# 'y' for randomized split, anything else otherwise
 DO_FEATURE_SELECTION 	= 'n'				# 'y' for yes, anything else otherwise
-
 def r(l,u):
 	return range(l, u+1)
-
 #X_COLS 				= r(2,27)+r(28,43)+r(44,59)+r(60,75)+r(76,91)+r(92,107)+r(108,113)+r(114,119)			# both included; 2 means column C in excel
-X_COLS = [39,6,44,49,51,48,31,32,33,45,69,41,42,43,76,60,67,47,63,62,116,117,118,119]
-X_TRAIN_START		= 50
-X_TRAIN_END			= -100						# 50 means 50th row in excel
-X_TEST_START		= -100						# end is included
-X_TEST_END			= -50
+#X_COLS = [39,6,44,49,51,48,31,32,33,45,69,41,42,43,76,60,67,47,63,62,116,117,118,119]
+X_COLS 				= r(31,56)
+X_TRAIN_START		= 2267
+X_TRAIN_END			= 2267+950						# 50 means 50th row in excel
+X_TEST_START		= 2267+951						# end is included
+X_TEST_END			= 2267+1000
 
-Y_COLS 	 			= 121				# Y to be predicted											# 
-
+Y_COLS 	 			= 66				# Y to be predicted													# 
+print Y_COLS
 CALCULATE_RETURNS	= 'y'				# 'y' for yes, anything else otherwise
-RETURNS_COLS 		= 120		# To calculate returns. size same as Y_TO_PREDICT 	# If CALCULATE_RETURNS is not 'y', put any valid column in this one
+RETURNS_COLS 		= 65				# To calculate returns. size same as Y_TO_PREDICT 	# If CALCULATE_RETURNS is not 'y', put any valid column in this one
 
 N_FEATURES 			= None				# Number of features to select
 
@@ -52,42 +51,61 @@ COL_TOBE_SCALED 	= [32,6]			# 32 = OBV, 6 = Volume_today
 #################################################################################################
 X_TRAIN_END 	= X_TRAIN_END + 1
 X_TEST_END 		= X_TEST_END + 1
-
+out = []
 # Input: file name
 def MAIN(file):
 	data 		= np.genfromtxt(file ,delimiter = ',' , autostrip = True)
-	if SPLIT_RANDOM == 'y':
-		X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START:X_TRAIN_END,X_COLS], data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
-	else:
-		X_train 	= data[X_TRAIN_START:X_TRAIN_END,X_COLS]
-		Y_train 	= data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]]
-		X_test 		= data[X_TEST_START:X_TEST_END,X_COLS]
-		Y_test 		= data[X_TEST_START:X_TEST_END,[Y_COLS,RETURNS_COLS]]	
-	X_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
-	Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
-	X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
-	Y_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_test)
-	scaler		= MinMaxScaler().fit(X_train)
-	X_train 	= scaler.transform(X_train)
-	X_test 		= scaler.transform(X_test)
-	if DO_PCA == 'y':
-		X = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
-		X_train = X[:len(X_train)]
-		X_test = X[len(X_train):]
-	Abs_train 	= Y_train[:,1]
-	Abs_test 	= Y_test[:,1]
-	RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0])
-	
+	s=0.0
+	l=10
+	for i in range(l):
+		print i+1
+		if SPLIT_RANDOM == 'y':
+			X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,X_COLS], data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
+		else:
+			X_train 	= data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,X_COLS]
+			Y_train 	= data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,[Y_COLS,RETURNS_COLS]]
+			X_test 		= data[X_TEST_START+10*i:X_TEST_END+10*i,X_COLS]
+			Y_test 		= data[X_TEST_START+10*i:X_TEST_END+10*i,[Y_COLS,RETURNS_COLS]]	
+		X_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
+		Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
+		X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
+		Y_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_test)
+		scaler		= MinMaxScaler().fit(X_train)
+		X_train 	= scaler.transform(X_train)
+		X_test 		= scaler.transform(X_test)
+		important_features = SelectImportantFeatures(X_train, Y_train[:,0])
+	#	print important_features
+	#	X_train 	= X_train[:,important_features[:int(len(important_features)*.8)]]
+	#	X_test 		= X_test [:,important_features[:int(len(important_features)*.8)]]
+		if DO_PCA == 'y':
+			X = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
+			X_train = X[:len(X_train)]
+			X_test = X[len(X_train):]
+		Abs_train 	= Y_train[:,1]
+		Abs_test 	= Y_test[:,1]
+		s = s+RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0])
+	print 'average: '+ str(s/l)
+	for i in range(l):
+#		print out[i]
+		out[i] = np.hstack(([0]*10*(i) ,out[i] , [0]*10*(l-i)))
+	pandas.DataFrame(out).to_csv('out.csv',index=False)
+
 def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test):
-	RunLR (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LR_')
-	RunLDA(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LDA')
-	RunLAS(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LAS')
-	RunRID(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RID')
-	RunNB (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'NB_')
-	RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'KNN')
-	RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
-	RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
-	RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
+#	RunLR (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LR_')
+#	RunLDA(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LDA')
+#	RunLAS(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LAS')
+#	RunRID(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RID')
+#	RunNB (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'NB_')
+#	RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'KNN')
+#	s = 0.0
+#	l = 50
+#	for i in range(1,l):
+#		s = s + RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
+#		print i
+#	return RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
+#	print 'average : ' +str(s/l) 
+	return RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
+#	RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
 
 def ComputeDistribution(Y_train, Y_test):
 	lp = 0.0
@@ -312,22 +330,26 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	print ('------------------------------------------')
 
 def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
-	model 			= SVC(C=1.0, kernel='rbf', degree=3, gamma='auto', coef0=0.0, shrinking=True, probability=True, 
-							tol=0.01, cache_size=200, class_weight=None, verbose=False, max_iter=-1, 
-							decision_function_shape='ovo', random_state=None)
-#	param_grid =  [{'C': [1], 'gamma': [ 0.0001], 'kernel': ['rbf']},{'C': [.001], 'gamma': [ 0.01], 'kernel': ['rbf']}]
-#	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=1, iid=True, 
-#									refit='best_score_', cv=None, verbose=0, pre_dispatch='2*n_jobs', 
-#									error_score='raise', return_train_score='warn')
-#	clf.fit(X_train, Y_train)
-#	x = (clf.best_params_ )
-#	print x
-#	model = SVC(kernel= 'rbf', C= 1e-28, gamma= 0.001)
+	model 			= SVC(C=0.8, kernel='rbf', degree=3, gamma=5, coef0=0.0, shrinking=True, 
+					probability=False, tol=0.001, cache_size=200, class_weight=None, verbose=False, 
+					max_iter=-1, decision_function_shape='ovr', random_state=None)
+	gamma = [1.0/i for i in range(40,140)]
+	C = range(10,20)
+	param_grid =  [{'C': C, 'gamma': gamma, 'kernel': ['rbf']}]
+	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=6, iid=True, 
+									refit='best_score_', cv=5, verbose=0, pre_dispatch='2*n_jobs', 
+									error_score='raise', return_train_score='warn')
+	clf.fit(X_train, Y_train)
+	x = (clf.best_params_ )
+	print x
+#	exit()
+	model.set_params(**x)
 	model.fit(X_train, Y_train)
 #	print model.get_params(deep=True)
 	pred_test 	= model.predict(X_test)
 	pred_train 	= model.predict(X_train)
-	
+	out.append(list(pred_train))
+#	print out
 	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
 	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
 	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
@@ -335,14 +357,24 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	if CALCULATE_RETURNS == 'y':
 		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
 	print ('------------------------------------------')
+	return accuracy[2][0]
 
 def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
-	model 				= RandomForestClassifier(n_estimators=100, criterion='gini', max_depth=None, min_samples_split=2, min_samples_leaf=1,
-									 min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, 
+	model 				= RandomForestClassifier(n_estimators=301, criterion='gini', max_depth=40, min_samples_split=2, min_samples_leaf=10,
+									 min_weight_fraction_leaf=0.0, max_features='sqrt', max_leaf_nodes=None, min_impurity_decrease=0.00, 
 									 min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
 									 warm_start=False, class_weight=None)
-#	model = tree.DecisionTreeClassifier(criterion='gini', splitter='best', max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, random_state=None, max_leaf_nodes=20, min_impurity_decrease=0.002, min_impurity_split=None, class_weight=None, presort=False)
 	relevant_features 	= FeatureSelection(X_train, Y_train, model, N_FEATURES)
+	param_grid =  [{'min_samples_leaf':[i for i in range(1,10)], 'min_samples_split':[i for i in range(2,12)]}]
+	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=6, iid=True, 
+									refit='best_score_', cv=5, verbose=0, pre_dispatch='2*n_jobs', 
+									error_score='raise', return_train_score='warn')
+	clf.fit(X_train, Y_train)
+	x = (clf.best_params_ )
+	print x
+#	exit()
+	model.set_params(**x)
+	model.fit(X_train, Y_train)
 #	model 				= RandomForestClassifier(n_estimators=300, criterion='entropy',random_state = 0)
 	X_train_			= X_train[:,relevant_features]
 	X_test_				= X_test[:,relevant_features]
@@ -354,10 +386,11 @@ def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
 	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
 	accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
-	#print np.mean(cross_val_score(model, X_train, Y_train, cv=100))
+#	print np.mean(cross_val_score(model, X_train, Y_train, cv=100))
 	if CALCULATE_RETURNS == 'y':
 		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
 	print ('------------------------------------------')
+	return accuracy[2][0]
 
 def RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model 				= ExtraTreesClassifier()
@@ -365,7 +398,7 @@ def RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	X_train_			= X_train[:,relevant_features]
 	X_test_				= X_test[:,relevant_features]
 	model.fit(X_train_, Y_train)
-	print np.argsort(model.feature_importances_)
+#	print np.argsort(model.feature_importances_)
 	pred_test 		= model.predict(X_test_)
 	pred_train 		= model.predict(X_train_)
 	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
@@ -378,11 +411,18 @@ def RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 #	return s/len(X_train)
 
 def FeatureSelection(X_train, Y_train, model, n):
-	if FEATURE_SELECTION == 'y':
+	if DO_FEATURE_SELECTION == 'y':
 		relevant_features = RFE(model, n_features_to_select=n, step=1000, verbose=0).fit(X_train, Y_train).support_
 	else:
 		relevant_features = [True]*X_train.shape[1]
 	return relevant_features
+
+def SelectImportantFeatures(X_train, Y_train):
+	model = ExtraTreesClassifier()
+	model.fit(X_train,Y_train)
+	#model.fit(X_train[:-100], Y_train[:-100])
+	#if accuracy_score()
+	return np.argsort(model.feature_importances_)
 
 # call to the main function
 MAIN(filename)
