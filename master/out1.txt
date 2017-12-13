@@ -1,0 +1,284 @@
+1
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 97.476 %,	 2.524 %
+SVM_dist_pred_test             : 96.078 %,	 3.922 %
+SVM_accuracy_train_[T,+,-]     : 56.572 %,	 55.987 %,	 79.167 %
+SVM_accuracy_test__[T,+,-]     : 52.941 %,	 55.102 %,	 0.000 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.166 %,	 0.124 %,	 1.783 %
+SVM_ret.p.t_train_[cor, incor] : 1.479 %,	 -1.545 %
+SVM_ret.p.t_test_[T,+,-]       : -0.090 %,	 -0.034 %,	 -1.462 %
+SVM_ret.p.t_test_[cor, incor]  : 0.709 %,	 -0.989 %
+------------------------------------------
+2
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 94.532 %,	 5.468 %
+SVM_dist_pred_test             : 92.157 %,	 7.843 %
+SVM_accuracy_train_[T,+,-]     : 57.624 %,	 56.730 %,	 73.077 %
+SVM_accuracy_test__[T,+,-]     : 52.941 %,	 55.319 %,	 25.000 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.210 %,	 0.151 %,	 1.227 %
+SVM_ret.p.t_train_[cor, incor] : 1.490 %,	 -1.532 %
+SVM_ret.p.t_test_[T,+,-]       : 0.003 %,	 0.015 %,	 -0.137 %
+SVM_ret.p.t_test_[cor, incor]  : 0.797 %,	 -0.890 %
+------------------------------------------
+3
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 85.699 %,	 14.301 %
+SVM_dist_pred_test             : 90.196 %,	 9.804 %
+SVM_accuracy_train_[T,+,-]     : 61.830 %,	 59.877 %,	 73.529 %
+SVM_accuracy_test__[T,+,-]     : 50.980 %,	 54.348 %,	 20.000 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.354 %,	 0.251 %,	 0.973 %
+SVM_ret.p.t_train_[cor, incor] : 1.505 %,	 -1.512 %
+SVM_ret.p.t_test_[T,+,-]       : 0.001 %,	 0.014 %,	 -0.123 %
+SVM_ret.p.t_test_[cor, incor]  : 0.825 %,	 -0.857 %
+------------------------------------------
+4
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 83.386 %,	 16.614 %
+SVM_dist_pred_test             : 88.235 %,	 11.765 %
+SVM_accuracy_train_[T,+,-]     : 63.091 %,	 60.908 %,	 74.051 %
+SVM_accuracy_test__[T,+,-]     : 52.941 %,	 55.556 %,	 33.333 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.431 %,	 0.304 %,	 1.068 %
+SVM_ret.p.t_train_[cor, incor] : 1.536 %,	 -1.459 %
+SVM_ret.p.t_test_[T,+,-]       : 0.014 %,	 0.022 %,	 -0.044 %
+SVM_ret.p.t_test_[cor, incor]  : 0.808 %,	 -0.878 %
+------------------------------------------
+5
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 82.440 %,	 17.560 %
+SVM_dist_pred_test             : 82.353 %,	 17.647 %
+SVM_accuracy_train_[T,+,-]     : 63.828 %,	 61.480 %,	 74.850 %
+SVM_accuracy_test__[T,+,-]     : 58.824 %,	 59.524 %,	 55.556 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.454 %,	 0.321 %,	 1.077 %
+SVM_ret.p.t_train_[cor, incor] : 1.537 %,	 -1.457 %
+SVM_ret.p.t_test_[T,+,-]       : 0.128 %,	 0.093 %,	 0.293 %
+SVM_ret.p.t_test_[cor, incor]  : 0.824 %,	 -0.865 %
+------------------------------------------
+6
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 82.440 %,	 17.560 %
+SVM_dist_pred_test             : 86.275 %,	 13.725 %
+SVM_accuracy_train_[T,+,-]     : 64.458 %,	 61.862 %,	 76.647 %
+SVM_accuracy_test__[T,+,-]     : 58.824 %,	 59.091 %,	 57.143 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.468 %,	 0.329 %,	 1.116 %
+SVM_ret.p.t_train_[cor, incor] : 1.532 %,	 -1.463 %
+SVM_ret.p.t_test_[T,+,-]       : 0.102 %,	 0.073 %,	 0.280 %
+SVM_ret.p.t_test_[cor, incor]  : 0.801 %,	 -0.898 %
+------------------------------------------
+7
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 82.019 %,	 17.981 %
+SVM_dist_pred_test             : 82.353 %,	 17.647 %
+SVM_accuracy_train_[T,+,-]     : 65.300 %,	 62.436 %,	 78.363 %
+SVM_accuracy_test__[T,+,-]     : 58.824 %,	 59.524 %,	 55.556 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.492 %,	 0.346 %,	 1.157 %
+SVM_ret.p.t_train_[cor, incor] : 1.531 %,	 -1.464 %
+SVM_ret.p.t_test_[T,+,-]       : 0.133 %,	 0.095 %,	 0.306 %
+SVM_ret.p.t_test_[cor, incor]  : 0.827 %,	 -0.860 %
+------------------------------------------
+8
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 81.283 %,	 18.717 %
+SVM_dist_pred_test             : 80.392 %,	 19.608 %
+SVM_accuracy_train_[T,+,-]     : 66.246 %,	 63.131 %,	 79.775 %
+SVM_accuracy_test__[T,+,-]     : 56.863 %,	 58.537 %,	 50.000 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.522 %,	 0.368 %,	 1.192 %
+SVM_ret.p.t_train_[cor, incor] : 1.532 %,	 -1.460 %
+SVM_ret.p.t_test_[T,+,-]       : 0.089 %,	 0.070 %,	 0.163 %
+SVM_ret.p.t_test_[cor, incor]  : 0.817 %,	 -0.872 %
+------------------------------------------
+9
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 80.967 %,	 19.033 %
+SVM_dist_pred_test             : 78.431 %,	 21.569 %
+SVM_accuracy_train_[T,+,-]     : 66.562 %,	 63.377 %,	 80.110 %
+SVM_accuracy_test__[T,+,-]     : 54.902 %,	 57.500 %,	 45.455 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.523 %,	 0.370 %,	 1.174 %
+SVM_ret.p.t_train_[cor, incor] : 1.525 %,	 -1.473 %
+SVM_ret.p.t_test_[T,+,-]       : -0.036 %,	 -0.007 %,	 -0.141 %
+SVM_ret.p.t_test_[cor, incor]  : 0.733 %,	 -0.972 %
+------------------------------------------
+10
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 80.336 %,	 19.664 %
+SVM_dist_pred_test             : 78.431 %,	 21.569 %
+SVM_accuracy_train_[T,+,-]     : 68.034 %,	 64.398 %,	 82.888 %
+SVM_accuracy_test__[T,+,-]     : 54.902 %,	 57.500 %,	 45.455 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.576 %,	 0.406 %,	 1.273 %
+SVM_ret.p.t_train_[cor, incor] : 1.532 %,	 -1.457 %
+SVM_ret.p.t_test_[T,+,-]       : -0.036 %,	 -0.007 %,	 -0.141 %
+SVM_ret.p.t_test_[cor, incor]  : 0.733 %,	 -0.972 %
+------------------------------------------
+11
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 79.811 %,	 20.189 %
+SVM_dist_pred_test             : 78.431 %,	 21.569 %
+SVM_accuracy_train_[T,+,-]     : 69.190 %,	 65.217 %,	 84.896 %
+SVM_accuracy_test__[T,+,-]     : 54.902 %,	 57.500 %,	 45.455 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.612 %,	 0.431 %,	 1.327 %
+SVM_ret.p.t_train_[cor, incor] : 1.532 %,	 -1.455 %
+SVM_ret.p.t_test_[T,+,-]       : -0.036 %,	 -0.007 %,	 -0.141 %
+SVM_ret.p.t_test_[cor, incor]  : 0.733 %,	 -0.972 %
+------------------------------------------
+12
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 79.180 %,	 20.820 %
+SVM_dist_pred_test             : 76.471 %,	 23.529 %
+SVM_accuracy_train_[T,+,-]     : 69.821 %,	 65.737 %,	 85.354 %
+SVM_accuracy_test__[T,+,-]     : 52.941 %,	 56.410 %,	 41.667 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.635 %,	 0.449 %,	 1.342 %
+SVM_ret.p.t_train_[cor, incor] : 1.534 %,	 -1.447 %
+SVM_ret.p.t_test_[T,+,-]       : -0.062 %,	 -0.024 %,	 -0.184 %
+SVM_ret.p.t_test_[cor, incor]  : 0.736 %,	 -0.959 %
+------------------------------------------
+13
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 78.023 %,	 21.977 %
+SVM_dist_pred_test             : 76.471 %,	 23.529 %
+SVM_accuracy_train_[T,+,-]     : 71.188 %,	 66.846 %,	 86.603 %
+SVM_accuracy_test__[T,+,-]     : 52.941 %,	 56.410 %,	 41.667 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.671 %,	 0.478 %,	 1.354 %
+SVM_ret.p.t_train_[cor, incor] : 1.530 %,	 -1.453 %
+SVM_ret.p.t_test_[T,+,-]       : -0.062 %,	 -0.024 %,	 -0.184 %
+SVM_ret.p.t_test_[cor, incor]  : 0.736 %,	 -0.959 %
+------------------------------------------
+14
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 77.392 %,	 22.608 %
+SVM_dist_pred_test             : 76.471 %,	 23.529 %
+SVM_accuracy_train_[T,+,-]     : 71.399 %,	 67.120 %,	 86.047 %
+SVM_accuracy_test__[T,+,-]     : 52.941 %,	 56.410 %,	 41.667 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.670 %,	 0.482 %,	 1.316 %
+SVM_ret.p.t_train_[cor, incor] : 1.525 %,	 -1.464 %
+SVM_ret.p.t_test_[T,+,-]       : -0.062 %,	 -0.024 %,	 -0.184 %
+SVM_ret.p.t_test_[cor, incor]  : 0.736 %,	 -0.959 %
+------------------------------------------
+15
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 77.182 %,	 22.818 %
+SVM_dist_pred_test             : 76.471 %,	 23.529 %
+SVM_accuracy_train_[T,+,-]     : 71.819 %,	 67.439 %,	 86.636 %
+SVM_accuracy_test__[T,+,-]     : 52.941 %,	 56.410 %,	 41.667 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.680 %,	 0.489 %,	 1.323 %
+SVM_ret.p.t_train_[cor, incor] : 1.523 %,	 -1.470 %
+SVM_ret.p.t_test_[T,+,-]       : -0.062 %,	 -0.024 %,	 -0.184 %
+SVM_ret.p.t_test_[cor, incor]  : 0.736 %,	 -0.959 %
+------------------------------------------
+16
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 76.025 %,	 23.975 %
+SVM_dist_pred_test             : 78.431 %,	 21.569 %
+SVM_accuracy_train_[T,+,-]     : 72.976 %,	 68.465 %,	 87.281 %
+SVM_accuracy_test__[T,+,-]     : 54.902 %,	 57.500 %,	 45.455 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.707 %,	 0.515 %,	 1.317 %
+SVM_ret.p.t_train_[cor, incor] : 1.518 %,	 -1.481 %
+SVM_ret.p.t_test_[T,+,-]       : -0.018 %,	 0.004 %,	 -0.099 %
+SVM_ret.p.t_test_[cor, incor]  : 0.749 %,	 -0.952 %
+------------------------------------------
+17
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 75.394 %,	 24.606 %
+SVM_dist_pred_test             : 78.431 %,	 21.569 %
+SVM_accuracy_train_[T,+,-]     : 73.607 %,	 69.038 %,	 87.607 %
+SVM_accuracy_test__[T,+,-]     : 54.902 %,	 57.500 %,	 45.455 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.726 %,	 0.532 %,	 1.323 %
+SVM_ret.p.t_train_[cor, incor] : 1.518 %,	 -1.480 %
+SVM_ret.p.t_test_[T,+,-]       : -0.018 %,	 0.004 %,	 -0.099 %
+SVM_ret.p.t_test_[cor, incor]  : 0.749 %,	 -0.952 %
+------------------------------------------
+18
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 75.079 %,	 24.921 %
+SVM_dist_pred_test             : 78.431 %,	 21.569 %
+SVM_accuracy_train_[T,+,-]     : 73.712 %,	 69.188 %,	 87.342 %
+SVM_accuracy_test__[T,+,-]     : 54.902 %,	 57.500 %,	 45.455 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.734 %,	 0.539 %,	 1.320 %
+SVM_ret.p.t_train_[cor, incor] : 1.521 %,	 -1.472 %
+SVM_ret.p.t_test_[T,+,-]       : -0.018 %,	 0.004 %,	 -0.099 %
+SVM_ret.p.t_test_[cor, incor]  : 0.749 %,	 -0.952 %
+------------------------------------------
+19
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 74.027 %,	 25.973 %
+SVM_dist_pred_test             : 76.471 %,	 23.529 %
+SVM_accuracy_train_[T,+,-]     : 74.763 %,	 70.170 %,	 87.854 %
+SVM_accuracy_test__[T,+,-]     : 56.863 %,	 58.974 %,	 50.000 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.777 %,	 0.576 %,	 1.349 %
+SVM_ret.p.t_train_[cor, incor] : 1.528 %,	 -1.449 %
+SVM_ret.p.t_test_[T,+,-]       : -0.004 %,	 0.013 %,	 -0.061 %
+SVM_ret.p.t_test_[cor, incor]  : 0.736 %,	 -0.979 %
+------------------------------------------
+20
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 73.502 %,	 26.498 %
+SVM_dist_pred_test             : 74.510 %,	 25.490 %
+SVM_accuracy_train_[T,+,-]     : 75.289 %,	 70.672 %,	 88.095 %
+SVM_accuracy_test__[T,+,-]     : 54.902 %,	 57.895 %,	 46.154 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.793 %,	 0.591 %,	 1.353 %
+SVM_ret.p.t_train_[cor, incor] : 1.528 %,	 -1.447 %
+SVM_ret.p.t_test_[T,+,-]       : -0.038 %,	 -0.009 %,	 -0.124 %
+SVM_ret.p.t_test_[cor, incor]  : 0.731 %,	 -0.975 %
+------------------------------------------
+21
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 72.450 %,	 27.550 %
+SVM_dist_pred_test             : 74.510 %,	 25.490 %
+SVM_accuracy_train_[T,+,-]     : 76.341 %,	 71.698 %,	 88.550 %
+SVM_accuracy_test__[T,+,-]     : 54.902 %,	 57.895 %,	 46.154 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.830 %,	 0.625 %,	 1.369 %
+SVM_ret.p.t_train_[cor, incor] : 1.531 %,	 -1.432 %
+SVM_ret.p.t_test_[T,+,-]       : -0.038 %,	 -0.009 %,	 -0.124 %
+SVM_ret.p.t_test_[cor, incor]  : 0.731 %,	 -0.975 %
+------------------------------------------
+22
+SVM_dist_actual_total          : 55.190 %,	 44.810 %
+SVM_dist_pred_train            : 71.609 %,	 28.391 %
+SVM_dist_pred_test             : 72.549 %,	 27.451 %
+SVM_accuracy_train_[T,+,-]     : 77.182 %,	 72.540 %,	 88.889 %
+SVM_accuracy_test__[T,+,-]     : 56.863 %,	 59.459 %,	 50.000 %
+ 
+	
+SVM_ret.p.t_train_[T,+,-]      : 0.848 %,	 0.645 %,	 1.360 %
+SVM_ret.p.t_train_[cor, incor] : 1.526 %,	 -1.446 %
+SVM_ret.p.t_test_[T,+,-]       :
