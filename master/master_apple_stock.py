@@ -26,10 +26,13 @@ from sklearn.decomposition import PCA
 #################################################################################################
 ################# CHANGES TO BE MADE ONLY IN FOLLOWING PART #####################################
 filename = '../scripts/AAPL_ycc.csv'
-DO_PCA 				= 'n'
-SPLIT_RANDOM		= 'n'				# 'y' for randomized split, anything else otherwise
+DO_PCA 					= 'n'
+SPLIT_RANDOM			= 'n'				# 'y' for randomized split, anything else otherwise
+DO_FEATURE_SELECTION 	= 'n'				# 'y' for yes, anything else otherwise
+
 def r(l,u):
 	return range(l, u+1)
+
 #X_COLS 				= r(2,27)+r(28,43)+r(44,59)+r(60,75)+r(76,91)+r(92,107)+r(108,113)+r(114,119)			# both included; 2 means column C in excel
 X_COLS = [39,6,44,49,51,48,31,32,33,45,69,41,42,43,76,60,67,47,63,62,116,117,118,119]
 X_TRAIN_START		= 50
@@ -43,7 +46,6 @@ CALCULATE_RETURNS	= 'y'				# 'y' for yes, anything else otherwise
 RETURNS_COLS 		= 120		# To calculate returns. size same as Y_TO_PREDICT 	# If CALCULATE_RETURNS is not 'y', put any valid column in this one
 
 N_FEATURES 			= None				# Number of features to select
-FEATURE_SELECTION 	= 'n'				# 'y' for yes, anything else otherwise
 
 COL_TOBE_SCALED 	= [32,6]			# 32 = OBV, 6 = Volume_today
 ##################### NO CHANGES BEYOND THIS POINT ##############################################
@@ -210,7 +212,7 @@ def RunLR(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	X_train_ 			= X_train[:,relevant_features]
 	X_test_				= X_test[:,relevant_features]
 	model.fit(X_train_, Y_train)
-	print model.coef_
+#	print model.coef_
 		
 #	predicted_prob = model.predict_proba(X_test_)
 #	class_label = [0]*len(predicted_prob) 
@@ -313,15 +315,14 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model 			= SVC(C=1.0, kernel='rbf', degree=3, gamma='auto', coef0=0.0, shrinking=True, probability=True, 
 							tol=0.01, cache_size=200, class_weight=None, verbose=False, max_iter=-1, 
 							decision_function_shape='ovo', random_state=None)
-	param_grid =  [{'C': [1], 'gamma': [ 0.0001], 'kernel': ['rbf']},{'C': [.001], 'gamma': [ 0.01], 'kernel': ['rbf']}]
-	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=1, iid=True, 
-									refit='best_score_', cv=None, verbose=0, pre_dispatch='2*n_jobs', 
-									error_score='raise', return_train_score='warn')
-	clf.fit(X_train, Y_train)
-	x = (clf.best_params_ )
-	print x
-	#exit()
-	model = SVC(kernel= 'rbf', C= 1e-28, gamma= 0.001)
+#	param_grid =  [{'C': [1], 'gamma': [ 0.0001], 'kernel': ['rbf']},{'C': [.001], 'gamma': [ 0.01], 'kernel': ['rbf']}]
+#	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=1, iid=True, 
+#									refit='best_score_', cv=None, verbose=0, pre_dispatch='2*n_jobs', 
+#									error_score='raise', return_train_score='warn')
+#	clf.fit(X_train, Y_train)
+#	x = (clf.best_params_ )
+#	print x
+#	model = SVC(kernel= 'rbf', C= 1e-28, gamma= 0.001)
 	model.fit(X_train, Y_train)
 #	print model.get_params(deep=True)
 	pred_test 	= model.predict(X_test)
@@ -364,7 +365,7 @@ def RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	X_train_			= X_train[:,relevant_features]
 	X_test_				= X_test[:,relevant_features]
 	model.fit(X_train_, Y_train)
-	print model.feature_importances_
+	print np.argsort(model.feature_importances_)
 	pred_test 		= model.predict(X_test_)
 	pred_train 		= model.predict(X_train_)
 	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
