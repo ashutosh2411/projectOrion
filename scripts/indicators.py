@@ -13,7 +13,7 @@ def main(filename):
 	dataset = pandas.read_csv(in_address)
 	data = dataset.values
 	date_ycc = data[:,0]
-	date_yoc = np.hstack((data[1:,0],'11-11-1911'))
+	date_yoc = np.hstack((data[1:,0],'1911-11-11'))
 	day_ycc = day_to_date(date_ycc)
 	day_yoc = day_to_date(date_yoc)
 
@@ -152,7 +152,7 @@ def main(filename):
 def day_to_date(date):
 	day = []
 	for i in date:	
-		day.append(datetime.datetime.strptime(i, "%d-%m-%Y").strftime('%A'))
+		day.append(datetime.datetime.strptime(i, "%Y-%m-%d").strftime('%A'))
 	return day
 
 #calculates the difference between today's opening and yesterday's closing
@@ -185,7 +185,7 @@ def past_lag(data, day_range):
 	for i in range(len(data)-day_range):
 		x = data[i:i+day_range]
 		past_lag_list = np.vstack((past_lag_list, x[::-1]))
-	return past_lag_list[1:,:]
+	return np.multiply(np.sign(past_lag_list[1:,:]),np.log(np.absolute(past_lag_list[1:,:])))
 
 def yccpast (data, day_range):
 	prevData = data
@@ -196,7 +196,7 @@ def yccpast (data, day_range):
 		prevData = np.hstack((np.nan,prevData))
 		pred = np.divide((data - prevData),prevData)
 		out = np.vstack((out,pred[:-i]))
-	return out[1:,:]
+	return np.multiply(np.sign(out[1:,:]),np.log(np.absolute(out[1:,:])))
 
 # returns the split for data. 
 def calculate_percentile (data, nDivs):
@@ -409,5 +409,5 @@ def ATR (high, low, close, timeperiod=14):
 	real_ = ta.ATR(high, low, close, timeperiod)
 	return real_
 
-filename = 'ICICIBANK.csv'
+filename = 'AAPL.csv'
 main(filename)
