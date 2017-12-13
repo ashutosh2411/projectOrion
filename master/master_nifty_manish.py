@@ -15,17 +15,19 @@ from sklearn.feature_selection import RFE
 
 # importing helper functions
 from sklearn.preprocessing import Imputer, scale, MinMaxScaler
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, roc_auc_score, make_scorer,log_loss, f1_score
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import confusion_matrix
 from sklearn import model_selection
 from sklearn.decomposition import PCA
 
+
+
 ####################################
 
 #################################################################################################
 ################# CHANGES TO BE MADE ONLY IN FOLLOWING PART #####################################
-filename = '../scripts/NIFTY_ycc.csv'
+filename = 'nifty_2000_2005_ycc.csv'
 DO_PCA 					= 'n'
 SPLIT_RANDOM			= 'n'				# 'y' for randomized split, anything else otherwise
 DO_FEATURE_SELECTION 	= 'n'				# 'y' for yes, anything else otherwise
@@ -35,10 +37,10 @@ def r(l,u):
 
 #X_COLS 				= r(2,27)+r(28,43)+r(44,59)+r(60,75)+r(76,91)+r(92,107)+r(108,113)+r(114,119)			# both included; 2 means column C in excel
 X_COLS = [37,38,36,48,47,45,57,40,73,46,44]
-X_TRAIN_START		= 950
-X_TRAIN_END			= 1950						# 50 means 50th row in excel
-X_TEST_START		= 1951						# end is included
-X_TEST_END			= 2000
+X_TRAIN_START		= 50
+X_TRAIN_END			= 1335						# 50 means 50th row in excel
+X_TEST_START		= 1336					# end is included
+X_TEST_END			= 1405
 
 Y_COLS 	 			= 121				# Y to be predicted											# 
 
@@ -76,17 +78,32 @@ def MAIN(file):
 		X_test = X[len(X_train):]
 	Abs_train 	= Y_train[:,1]
 	Abs_test 	= Y_test[:,1]
-	RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0])
+	RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0],data)
 	
-def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test):
+def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test,data):
 	#RunLR (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LR_')
 	#RunLDA(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LDA')
 	#RunLAS(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LAS')
 	#RunRID(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RID')
 	#RunNB (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'NB_')
 	#RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'KNN')
-	RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
-	RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
+	s = 0.0
+	for i in range(10):
+		X_train 	= data[X_TRAIN_START + i*70:X_TRAIN_END+i*70,X_COLS]
+		Y_train 	= data[X_TRAIN_START+i*70:X_TRAIN_END+i*70,[Y_COLS,RETURNS_COLS]]
+		Abs_train 	= Y_train[:,1]
+		Y_train = Y_train[:,0]
+		X_test 		= data[X_TEST_START+i*70:X_TEST_END+i*70,X_COLS]
+		Y_test 		= data[X_TEST_START+i*70:X_TEST_END+i*70,[Y_COLS,RETURNS_COLS]]	
+		Abs_test 	= Y_test[:,1]
+		Y_test = Y_test[:,0]
+		p =  RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
+		print p
+		
+		s = s + p
+	print('average' + str(s/10))
+	#RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
+	#RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 	#RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
 
 def ComputeDistribution(Y_train, Y_test):
@@ -313,20 +330,19 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 
 def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#for i in range(1,30):
-	model 			= SVC(C=0.8, kernel='rbf', degree=3, gamma=5, coef0=0.0, shrinking=True, 
-					probability=False, tol=0.001, cache_size=200, class_weight=None, verbose=False, 
-					max_iter=-1, decision_function_shape='ovr', random_state=None)
-	param_grid =  [{'C': [0.8,1,1.25,1.755], 'gamma': range(1,30), 'kernel': ['rbf']}]
-	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=1, iid=True, 
+	custom_score = make_scorer(f1_score ,average = 'macro')
+	model 			= SVC()
+	C_range = [0.1,1,10,100]
+	gamma_range = [1.0/i for i in range(60,80)]
+	param_grid =  [{ 'C': C_range, 'gamma': gamma_range, 'kernel': ['rbf']}]
+	clf = model_selection.GridSearchCV(model, param_grid, scoring=custom_score, fit_params=None, n_jobs=3, iid=True, 
 									refit='best_score_', cv=None, verbose=0, pre_dispatch='2*n_jobs', 
 									error_score='raise', return_train_score='warn')
 	clf.fit(X_train, Y_train)
 	x = (clf.best_params_ )
 	print x
-#	model = SVC(kernel= 'rbf', C= 1e-28, gamma= 0.001)
-	#print(i)
+	model.set_params(**x)
 	model.fit(X_train, Y_train)
-#	print model.get_params(deep=True)
 	pred_test 	= model.predict(X_test)
 	pred_train 	= model.predict(X_train)
 	
@@ -338,12 +354,12 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	if CALCULATE_RETURNS == 'y':
 		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
 	print ('------------------------------------------')
-
+	return(accuracy[2][0])
 def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
-	model 				= RandomForestClassifier(n_estimators=100, criterion='gini', max_depth=None, min_samples_split=3, min_samples_leaf=3,
-									 min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.003, 
-									 min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
-									 warm_start=False, class_weight=None)
+	model 				= RandomForestClassifier(n_estimators=10, criterion='gini', max_depth=None, min_samples_split=2, min_samples_leaf=1, 
+								min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, bootstrap=True, 
+								oob_score=False, n_jobs=1, random_state=None, verbose=0, warm_start=False, class_weight=None)
+
 #	model = tree.DecisionTreeClassifier(criterion='gini', splitter='best', max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, random_state=None, max_leaf_nodes=20, min_impurity_decrease=0.002, min_impurity_split=None, class_weight=None, presort=False)
 	relevant_features 	= FeatureSelection(X_train, Y_train, model, N_FEATURES)
 #	model 				= RandomForestClassifier(n_estimators=300, criterion='entropy',random_state = 0)
