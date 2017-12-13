@@ -14,7 +14,7 @@ from sklearn.svm import SVC, SVR
 from sklearn.feature_selection import RFE
 
 # importing helper functions
-from sklearn.preprocessing import Imputer, scale
+from sklearn.preprocessing import Imputer, scale, MinMaxScaler
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import confusion_matrix
@@ -65,6 +65,9 @@ def MAIN(file):
 	Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
 	X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
 	Y_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_test)
+	scaler		= MinMaxScaler().fit(X_train)
+	X_train 	= scaler.transform(X_train)
+	X_test 		= scaler.transform(X_test)
 	if DO_PCA == 'y':
 		X = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
 		X_train = X[:len(X_train)]
@@ -361,6 +364,7 @@ def RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	X_train_			= X_train[:,relevant_features]
 	X_test_				= X_test[:,relevant_features]
 	model.fit(X_train_, Y_train)
+	print model.feature_importances_
 	pred_test 		= model.predict(X_test_)
 	pred_train 		= model.predict(X_train_)
 	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
