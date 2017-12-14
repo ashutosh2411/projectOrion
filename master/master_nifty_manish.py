@@ -15,8 +15,8 @@ from sklearn.feature_selection import RFE
 
 # importing helper functions
 from sklearn.preprocessing import Imputer, scale, MinMaxScaler
-from sklearn.metrics import accuracy_score, roc_auc_score, make_scorer,log_loss, f1_score
-from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score, roc_auc_score, make_scorer,log_loss, f1_score, average_precision_score,explained_variance_score, log_loss
+from sklearn.model_selection import cross_val_score, TimeSeriesSplit
 from sklearn.metrics import confusion_matrix
 from sklearn import model_selection
 from sklearn.decomposition import PCA
@@ -37,11 +37,11 @@ def r(l,u):
 
 #X_COLS 				= r(2,27)+r(28,43)+r(44,59)+r(60,75)+r(76,91)+r(92,107)+r(108,113)+r(114,119)			# both included; 2 means column C in excel
 X_COLS = [37,38,36,48,47,45,57,40,73,46,44]
-X_TRAIN_START		= 50
-X_TRAIN_END			= 1335						# 50 means 50th row in excel
-X_TEST_START		= 1336					# end is included
-X_TEST_END			= 1405
-
+X_TRAIN_START		= 2050
+X_TRAIN_END			= 3000						# 50 means 50th row in excel
+X_TEST_START		= 3001					# end is included
+X_TEST_END			= 3051
+print X_TEST_END
 Y_COLS 	 			= 121				# Y to be predicted											# 
 
 CALCULATE_RETURNS	= 'y'				# 'y' for yes, anything else otherwise
@@ -79,7 +79,30 @@ def MAIN(file):
 	Abs_train 	= Y_train[:,1]
 	Abs_test 	= Y_test[:,1]
 	RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0],data)
-	
+def my_own_accuracy(y_true, y_pred):
+	plus = 1.0
+	minus = 1.0
+	for i in range(len(y_true)):
+		if(y_pred[i]>0):
+			plus = plus + 1.0
+		else:
+			minus = minus + 1.0
+	#print(plus)
+	#print(minus)
+	if(minus/(minus+plus) < 0.3):
+		print('---------minus is less----------')
+		print(minus)
+		print(plus)
+		print(accuracy_score(y_true,y_pred))
+		return(-1)
+		print('-----------------------------')
+	else:
+		print('-----------enough minus------------------')
+		print(minus)
+		print(plus)
+		print(accuracy_score(y_true,y_pred))
+		return(accuracy_score(y_true,y_pred))
+		print('-----------------------------')
 def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test,data):
 	#RunLR (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LR_')
 	#RunLDA(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LDA')
@@ -87,8 +110,8 @@ def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test,data):
 	#RunRID(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RID')
 	#RunNB (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'NB_')
 	#RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'KNN')
-	s = 0.0
-	for i in range(10):
+	'''s = 0.0
+	for i in range(1):
 		X_train 	= data[X_TRAIN_START + i*70:X_TRAIN_END+i*70,X_COLS]
 		Y_train 	= data[X_TRAIN_START+i*70:X_TRAIN_END+i*70,[Y_COLS,RETURNS_COLS]]
 		Abs_train 	= Y_train[:,1]
@@ -101,9 +124,9 @@ def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test,data):
 		print p
 		
 		s = s + p
-	print('average' + str(s/10))
+	print('average' + str(s/10))'''
 	#RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
-	#RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
+	RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 	#RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
 
 def ComputeDistribution(Y_train, Y_test):
@@ -199,7 +222,19 @@ def Returns(Abs, pred, Y):
 	else:
 		ret4 = (s4/l4)*100
 	return (ret0,ret1,ret2), (ret3,ret4)
-
+def custom_threshold(prob_val,distribution):
+	distribution = list(distribution)
+	distribution[0] = distribution[0]/100.0
+	distribution[1] = distribution[1]/100.0
+	prob_val = np.asarray(prob_val)
+	minus_prob = prob_val[:,0]
+	plus_prob = prob_val[:,1]
+	plus_prob = np.sort(plus_prob)
+	minus_prob = np.sort(minus_prob)
+	plus_thres = plus_prob[ int(np.ceil(len(plus_prob)*distribution[1] + (1-distribution[1])*0.75*len(plus_prob)))]
+	minus_thres = minus_prob[int(np.ceil(len(minus_prob)*distribution[0] + (1-distribution[0])*0.75*len(plus_prob)))]
+	print(minus_thres,plus_thres)
+	return([minus_thres, plus_thres])
 def ComputeAccuracyForOne(cnf_mat):	
 #	[[tp, fn]
 #	 [fp, tn]]
@@ -330,14 +365,12 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 
 def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#for i in range(1,30):
-	custom_score = make_scorer(f1_score ,average = 'macro')
+	custom_score = make_scorer(my_own_accuracy )
 	model 			= SVC()
-	C_range = [0.1,1,10,100]
-	gamma_range = [1.0/i for i in range(60,80)]
+	C_range = [1000]
+	gamma_range = [1.0/i for i in range(50,80)]
 	param_grid =  [{ 'C': C_range, 'gamma': gamma_range, 'kernel': ['rbf']}]
-	clf = model_selection.GridSearchCV(model, param_grid, scoring=custom_score, fit_params=None, n_jobs=3, iid=True, 
-									refit='best_score_', cv=None, verbose=0, pre_dispatch='2*n_jobs', 
-									error_score='raise', return_train_score='warn')
+	clf = model_selection.GridSearchCV(model, param_grid, scoring=custom_score)
 	clf.fit(X_train, Y_train)
 	x = (clf.best_params_ )
 	print x
@@ -356,19 +389,38 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	print ('------------------------------------------')
 	return(accuracy[2][0])
 def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
-	model 				= RandomForestClassifier(n_estimators=10, criterion='gini', max_depth=None, min_samples_split=2, min_samples_leaf=1, 
+	custom_score = make_scorer(accuracy_score)
+	param_grid =  [{ 'min_samples_split': [3*i for i in range(1,7)], 'min_samples_leaf': [3*i for i in range(1,7)]}]
+	model = RandomForestClassifier(n_estimators=300, criterion='gini', max_depth=40, min_samples_split=2, min_samples_leaf=1, 
 								min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, bootstrap=True, 
 								oob_score=False, n_jobs=1, random_state=None, verbose=0, warm_start=False, class_weight=None)
+	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, cv = TimeSeriesSplit(n_splits = 5))
+	clf.fit(X_train, Y_train)
+	x = (clf.best_params_ )
 
+	print x
+	
+	model.set_params(**x)
 #	model = tree.DecisionTreeClassifier(criterion='gini', splitter='best', max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, random_state=None, max_leaf_nodes=20, min_impurity_decrease=0.002, min_impurity_split=None, class_weight=None, presort=False)
 	relevant_features 	= FeatureSelection(X_train, Y_train, model, N_FEATURES)
 #	model 				= RandomForestClassifier(n_estimators=300, criterion='entropy',random_state = 0)
 	X_train_			= X_train[:,relevant_features]
 	X_test_				= X_test[:,relevant_features]
+	actual_dist 	= ComputeDistribution(Y_train, Y_test)
 	model.fit(X_train_, Y_train)
+	pred_prob = model.predict_proba(X_test_)
+	threshold = custom_threshold(pred_prob,actual_dist)
+	pred_test = [0]*len(Y_test)
+	for i in range(len(Y_test)):
+		if(pred_prob[i][0] > threshold[0]):
+			pred_test[i] = -1
+		elif(pred_prob[i][1] > threshold[1]):
+			pred_test[i] = 1
+	pred_thres_array = np.vstack((X_test_.T, Abs_test, Y_test, pred_test))
+	
+	np.savetxt("pre_out_nifty_200.csv", pred_thres_array.T, delimiter=",")
 	pred_test 		= model.predict(X_test_)
 	pred_train 		= model.predict(X_train_)
-	
 	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
 	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
 	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
