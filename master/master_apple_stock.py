@@ -16,7 +16,7 @@ from sklearn.feature_selection import RFE
 # importing helper functions
 from sklearn.preprocessing import Imputer, scale, MinMaxScaler
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, TimeSeriesSplit
 from sklearn.metrics import confusion_matrix
 from sklearn import model_selection
 from sklearn.decomposition import PCA
@@ -29,6 +29,7 @@ filename = 'AAPL_2001_to_2017_ycc.csv'
 DO_PCA 					= 'n'
 SPLIT_RANDOM			= 'n'				# 'y' for randomized split, anything else otherwise
 DO_FEATURE_SELECTION 	= 'n'				# 'y' for yes, anything else otherwise
+EXPONENTIAL_SMOOTHENING	= 'y'				# 'y' for yes, anything else otherwise
 def r(l,u):
 	return range(l, u+1)
 #X_COLS 				= r(2,27)+r(28,43)+r(44,59)+r(60,75)+r(76,91)+r(92,107)+r(108,113)+r(114,119)			# both included; 2 means column C in excel
@@ -51,7 +52,7 @@ COL_TOBE_SCALED 	= [32,6]			# 32 = OBV, 6 = Volume_today
 #################################################################################################
 X_TRAIN_END 	= X_TRAIN_END + 1
 X_TEST_END 		= X_TEST_END + 1
-out = []
+out = [np.asarray([0]*50)]
 # Input: file name
 def MAIN(file):
 	data 		= np.genfromtxt(file ,delimiter = ',' , autostrip = True)
@@ -77,6 +78,10 @@ def MAIN(file):
 	#	print important_features
 	#	X_train 	= X_train[:,important_features[:int(len(important_features)*.8)]]
 	#	X_test 		= X_test [:,important_features[:int(len(important_features)*.8)]]
+		ewma = pandas.stats.moments.ewma
+		if EXPONENTIAL_SMOOTHENING == 'y':
+			X_train = ewma(X_train, com=.25)
+			X_test 	= ewma(X_test, com=.25) 
 		if DO_PCA == 'y':
 			X = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
 			X_train = X[:len(X_train)]
@@ -85,10 +90,14 @@ def MAIN(file):
 		Abs_test 	= Y_test[:,1]
 		s = s+RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0])
 	print 'average: '+ str(s/l)
+#	print out.shape
+	print out
 	for i in range(l):
-#		print out[i]
-		out[i] = np.hstack(([0]*10*(i) ,out[i] , [0]*10*(l-i)))
-	pandas.DataFrame(out).to_csv('out.csv',index=False)
+		out[i] = np.hstack(([0]*10*(i+1), out[i] , [0]*10*(l-i)))
+#	out_ = np.vstack((out,list(data[X_TEST_START-10:X_TEST_END+100, Y_COLS])))
+	out_ = np.asarray(out[1:]).T
+	print len(data[X_TEST_START-10:X_TEST_END+100, Y_COLS])
+	pandas.DataFrame(out_).to_csv('out.csv',index=False, header=None, delimiter = ',')
 
 def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test):
 #	RunLR (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LR_')
@@ -361,13 +370,13 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 
 def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model 				= RandomForestClassifier(n_estimators=301, criterion='gini', max_depth=40, min_samples_split=2, min_samples_leaf=10,
-									 min_weight_fraction_leaf=0.0, max_features='sqrt', max_leaf_nodes=None, min_impurity_decrease=0.00, 
+									 min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.00, 
 									 min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
-									 warm_start=False, class_weight=None)
+									 warm_start=False, class_weight={1:1,-1:1.15})
 	relevant_features 	= FeatureSelection(X_train, Y_train, model, N_FEATURES)
-	param_grid =  [{'min_samples_leaf':[i for i in range(1,10)], 'min_samples_split':[i for i in range(2,12)]}]
-	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=6, iid=True, 
-									refit='best_score_', cv=5, verbose=0, pre_dispatch='2*n_jobs', 
+	param_grid =  [{'min_samples_leaf':[int(1.7**i+1) for i in range(2)], 'min_samples_split':[int(1.7**i)+1 for i in range(2)]}]
+	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=4, iid=True, 
+									refit='best_score_', cv=TimeSeriesSplit(n_splits=5), verbose=0, pre_dispatch='2*n_jobs', 
 									error_score='raise', return_train_score='warn')
 	clf.fit(X_train, Y_train)
 	x = (clf.best_params_ )
@@ -381,7 +390,9 @@ def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model.fit(X_train_, Y_train)
 	pred_test 		= model.predict(X_test_)
 	pred_train 		= model.predict(X_train_)
-	
+	t = out
+#	out_ = np.vstack(t,pred_test)
+	out.append(list(pred_test))
 	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
 	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
 	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
