@@ -367,9 +367,9 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	g_array = []
 	estimator = SVC()
 	param_distributions = [{'C': C_range,'gamma': G_range ,'kernel': ['rbf']} ]
-	clf = RandomizedSearchCV(estimator, param_distributions, n_iter=10, scoring=None, fit_params=None, n_jobs=1, iid=True, refit=True, cv=TimeSeriesSplit(n_splits = 10), verbose=0, pre_dispatch='2*n_jobs', random_state=None, error_score='raise', return_train_score='warn') 
+	clf = RandomizedSearchCV(estimator, param_distributions, n_iter=10, cv=TimeSeriesSplit(n_splits = 10)) 
 	clf.fit(X_train,Y_train)
-	x = clf.cv_results_
+	x = clf.best_params_
 	print(x)
 	actual_dist_array = []
 	predicted_test_array =[]
