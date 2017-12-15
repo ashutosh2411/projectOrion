@@ -362,14 +362,10 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	G_range = [1.0/i for i in G_range_]
 	C_range = [0.5,1,2,7,8,10,15,50,100,150,500,700,1000,2500,10000]
 	c_array = []
-	c_array.append('c_value')
 	g_array = [] 
-	g_array.append('gamma_value')
 	actual_dist_array = []
-	actual_dist_array.append(['plus_dist','minus_dist'])
 	predicted_test_array =[]
 	predicted_train_array =[]
-	predicted_train_array.append(['total acc train','plus_acc_train','plus_acc_train'])
 	predicted_train_acc_array =[]
 	predicted_test_acc_array = []
 	ret_pt_tot_train =[]
@@ -426,6 +422,7 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	predicted_test_array = np.asarray(predicted_test_array).T
 	actual_dist_array = np.asarray(actual_dist_array).T
 	out = np.vstack((c_array,g_array,actual_dist_array,predicted_train_array,predicted_test_array,predicted_train_acc_array,predicted_test_acc_array,ret_pt_tot_train,ret_pt_cor_inc_train,ret_pt_tot_test,ret_pt_cor_inc_test))
+	out = out.T
 	np.savetxt("c_gaama.csv", out.T, delimiter=",")
 
 	return(accuracy[2][0])

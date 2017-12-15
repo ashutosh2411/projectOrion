@@ -50,6 +50,17 @@ def main(filename):
 	t1 = np.hstack((yoc(o,c)[1:],np.nan))
 	t2 = np.hstack((compute_labels(calculate_percentile(yoc(o,c),2),yoc(o,c))[1:],np.nan))
 	t3 = np.hstack((compute_labels(calculate_percentile(yoc(o,c),1),yoc(o,c))[1:],np.nan))
+	o_o = o
+	h_h = h
+	l_l = l
+	c_c = c
+	v_v = v
+	alpha = 0.8
+	o = Smoothen(o, alpha)
+	h = Smoothen(h, alpha)
+	l = Smoothen(l, alpha)
+	c = Smoothen(c, alpha)
+	v = Smoothen(v, alpha)
 
 	i = []
 	names = []
@@ -175,7 +186,7 @@ def main(filename):
 	head = ['date','day','o_yday','h_yday','l_yday','c_yday','v_yday','o_tday','c_tday','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7',
 		'lag_8','lag_9','lag_10','lag_1_p','lag_2_p','lag_3_p','lag_4_p','lag_5_p','lag_6_p','lag_7_p',
 		'lag_8_p','lag_9_p','lag_10_p','yhc','ylc','yoc_past']+names+['yoc_abs','yoc_qnt','yoc_sgn']	
-	array_oc = np.vstack((date_yoc, day_yoc, o,h,l,c,v,o_,c_,ypast,past_lag_nday,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
+	array_oc = np.vstack((date_yoc, day_yoc, o_o,h_h,l_l,c_c,v_v,o_,c_,ypast,past_lag_nday,y_hc,y_lc,yoc_oc,indicators,out[0:3])).T
 	array_oc = pandas.DataFrame(np.vstack((head,array_oc)))
 	out_names = ['ycc1_abs','ycc1_sign','ycc1_qnt2','ycc1_qnt3','ycc2_abs','ycc2_sign','ycc2_qnt2','ycc2_qnt3','ycc3_abs','ycc3_sign','ycc3_qnt2','ycc3_qnt3','ycc4_abs','ycc4_sign','ycc4_qnt2','ycc4_qnt3','ycc5_abs','ycc5_sign','ycc5_qnt2','ycc5_qnt3','ycc6_abs','ycc6_sign','ycc6_qnt2','ycc6_qnt3','ycc7_abs','ycc7_sign','ycc7_qnt2','ycc7_qnt3','ycc8_abs','ycc8_sign','ycc8_qnt2','ycc8_qnt3','ycc9_abs','ycc9_sign','ycc9_qnt2','ycc9_qnt3','ycc10_abs','ycc10_sign','ycc10_qnt2','ycc10_qnt3','ycc15_abs','ycc15_sign','ycc15_qnt2','ycc15_qnt3','ycc20_abs','ycc20_sign','ycc20_qnt2','ycc20_qnt3','ycc30_abs','ycc30_sign','ycc30_qnt2','ycc30_qnt3']
 	head = ['date','day','o_tday','h_tday','l_tday','c_tday','v_tday','yoc_abs','lag_1','lag_2','lag_3','lag_4','lag_5','lag_6','lag_7','lag_8'
@@ -186,6 +197,13 @@ def main(filename):
 
 	array_cc.to_csv(filename[:-4] + '_ycc.csv',index = False)
 	array_oc.to_csv(filename[:-4] + '_yoc.csv',index = False)
+
+def Smoothen(x, alpha):
+	x_ = x
+	alpha = float(alpha)
+	for i in range(1,len(x)):
+		x_[i] = x[i]*alpha + x_[i-1]*(1-alpha)
+	return(x_)
 
 #converts list of days to list of dates
 def day_to_date(date):
