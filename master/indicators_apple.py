@@ -55,7 +55,7 @@ def main(filename):
 	l_l = l
 	c_c = c
 	v_v = v
-	alpha = 0.8
+	alpha = 1.0
 	o = Smoothen(o, alpha)
 	h = Smoothen(h, alpha)
 	l = Smoothen(l, alpha)
