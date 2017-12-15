@@ -29,44 +29,50 @@ filename = 'AAPL_2001_to_2017_ycc.csv'
 DO_PCA 					= 'n'
 SPLIT_RANDOM			= 'n'				# 'y' for randomized split, anything else otherwise
 DO_FEATURE_SELECTION 	= 'n'				# 'y' for yes, anything else otherwise
-EXPONENTIAL_SMOOTHENING	= 'y'				# 'y' for yes, anything else otherwise
+N_FEATURES 				= None				# Number of features to select
+EXPONENTIAL_SMOOTHENING	= 'n'				# 'y' for yes, anything else otherwise
+# Exponential smoothening for entire feature set. 
+FEATURE_SELECTION_RF 	= 'y'
+FRACT_FEATURES			= .5
 def r(l,u):
 	return range(l, u+1)
 #X_COLS 				= r(2,27)+r(28,43)+r(44,59)+r(60,75)+r(76,91)+r(92,107)+r(108,113)+r(114,119)			# both included; 2 means column C in excel
 #X_COLS = [39,6,44,49,51,48,31,32,33,45,69,41,42,43,76,60,67,47,63,62,116,117,118,119]
 X_COLS 				= r(31,56)
 X_TRAIN_START		= 2267
-X_TRAIN_END			= 2267+950						# 50 means 50th row in excel
-X_TEST_START		= 2267+951						# end is included
-X_TEST_END			= 2267+1000
+X_TRAIN_END			= 2267+1000						# 50 means 50th row in excel
+X_TEST_START		= 2267+1001							# end is included
+X_TEST_END			= 2267+1001
 
 Y_COLS 	 			= 66				# Y to be predicted													# 
 print Y_COLS
 CALCULATE_RETURNS	= 'y'				# 'y' for yes, anything else otherwise
 RETURNS_COLS 		= 65				# To calculate returns. size same as Y_TO_PREDICT 	# If CALCULATE_RETURNS is not 'y', put any valid column in this one
 
-N_FEATURES 			= None				# Number of features to select
 
 COL_TOBE_SCALED 	= [32,6]			# 32 = OBV, 6 = Volume_today
 ##################### NO CHANGES BEYOND THIS POINT ##############################################
 #################################################################################################
 X_TRAIN_END 	= X_TRAIN_END + 1
 X_TEST_END 		= X_TEST_END + 1
-out = [np.asarray([0]*50)]
 # Input: file name
 def MAIN(file):
 	data 		= np.genfromtxt(file ,delimiter = ',' , autostrip = True)
 	s=0.0
-	l=10
+	l=200
+	windowSize = 1
+	out = []
 	for i in range(l):
 		print i+1
 		if SPLIT_RANDOM == 'y':
-			X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,X_COLS], data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
+			print 'First shuffling, then splitting into test and train'
+			X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,X_COLS], data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,[Y_COLS,RETURNS_COLS]], test_size=.05, random_state = 0)
 		else:
-			X_train 	= data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,X_COLS]
-			Y_train 	= data[X_TRAIN_START+10*i:X_TRAIN_END+10*i,[Y_COLS,RETURNS_COLS]]
-			X_test 		= data[X_TEST_START+10*i:X_TEST_END+10*i,X_COLS]
-			Y_test 		= data[X_TEST_START+10*i:X_TEST_END+10*i,[Y_COLS,RETURNS_COLS]]	
+			print 'Sequential splitting'
+			X_train 	= data[X_TRAIN_START+windowSize*i:X_TRAIN_END+windowSize*i,X_COLS]
+			Y_train 	= data[X_TRAIN_START+windowSize*i:X_TRAIN_END+windowSize*i,[Y_COLS,RETURNS_COLS]]
+			X_test 		= data[X_TEST_START+windowSize*i:X_TEST_END+windowSize*i,X_COLS]
+			Y_test 		= data[X_TEST_START+windowSize*i:X_TEST_END+windowSize*i,[Y_COLS,RETURNS_COLS]]	
 		X_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
 		Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
 		X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
@@ -74,30 +80,33 @@ def MAIN(file):
 		scaler		= MinMaxScaler().fit(X_train)
 		X_train 	= scaler.transform(X_train)
 		X_test 		= scaler.transform(X_test)
-		important_features = SelectImportantFeatures(X_train, Y_train[:,0])
-	#	print important_features
-	#	X_train 	= X_train[:,important_features[:int(len(important_features)*.8)]]
-	#	X_test 		= X_test [:,important_features[:int(len(important_features)*.8)]]
+		if FEATURE_SELECTION_RF == 'y':
+			print 'Doing feature selection using Feature importance as returned by RF classifier.'
+			erf_features = SelectFeaturesRF(X_train, Y_train[:,0])
+			print erf_features
+			X_train 	= X_train[:,important_features[:int(len(important_features)*FRACT_FEATURES)]]
+			X_test 		= X_test [:,important_features[:int(len(important_features)*FRACT_FEATURES)]]
 		ewma = pandas.stats.moments.ewma
 		if EXPONENTIAL_SMOOTHENING == 'y':
 			X_train = ewma(X_train, com=.25)
 			X_test 	= ewma(X_test, com=.25) 
 		if DO_PCA == 'y':
-			X = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
-			X_train = X[:len(X_train)]
-			X_test = X[len(X_train):]
+			print 'doing feature selection'
+			pca = PCA(n_components=10, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit(X_train)
+			X_train = pca.transform(X_train)
+			X_test = pca.transform(X_test)
 		Abs_train 	= Y_train[:,1]
 		Abs_test 	= Y_test[:,1]
-		s = s+RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0])
-	print 'average: '+ str(s/l)
-#	print out.shape
-	print out
+		a = RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0])
+		s = s+a[0]
+		out.append(a[1])
+		print 'average: '+ str(s/i+1)
+	
 	for i in range(l):
-		out[i] = np.hstack(([0]*10*(i+1), out[i] , [0]*10*(l-i)))
-#	out_ = np.vstack((out,list(data[X_TEST_START-10:X_TEST_END+100, Y_COLS])))
-	out_ = np.asarray(out[1:]).T
-	print len(data[X_TEST_START-10:X_TEST_END+100, Y_COLS])
-	pandas.DataFrame(out_).to_csv('out.csv',index=False, header=None, delimiter = ',')
+		out[i] = np.hstack(([0]*windowSize*(i+1), out[i] , [0]*windowSize*(l-i)))
+	out = np.asarray(out)
+	out_ = np.vstack((data[X_TEST_START- windowSize:X_TEST_END+l* windowSize, Y_COLS],out))
+	pandas.DataFrame(out_.T).to_csv('out.csv',index=False, header=None)
 
 def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test):
 #	RunLR (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LR_')
@@ -111,9 +120,9 @@ def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test):
 #	for i in range(1,l):
 #		s = s + RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 #		print i
-#	return RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
+	return RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
 #	print 'average : ' +str(s/l) 
-	return RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
+#	return RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 #	RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
 
 def ComputeDistribution(Y_train, Y_test):
@@ -339,26 +348,21 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	print ('------------------------------------------')
 
 def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
-	model 			= SVC(C=0.8, kernel='rbf', degree=3, gamma=5, coef0=0.0, shrinking=True, 
-					probability=False, tol=0.001, cache_size=200, class_weight=None, verbose=False, 
-					max_iter=-1, decision_function_shape='ovr', random_state=None)
-	gamma = [1.0/i for i in range(40,140)]
-	C = range(10,20)
-	param_grid =  [{'C': C, 'gamma': gamma, 'kernel': ['rbf']}]
+	model 			= SVC(C=100000, kernel='rbf', gamma=.00719)
+	gamma = [1.0/i for i in range(1,100)]
+	C = [10**i for i in range(2,4)]
+	param_grid =  [{'C': C, 'gamma': gamma}]
 	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=6, iid=True, 
-									refit='best_score_', cv=5, verbose=0, pre_dispatch='2*n_jobs', 
+									refit='best_score_', cv = TimeSeriesSplit(n_splits = 5), verbose=0, pre_dispatch='2*n_jobs', 
 									error_score='raise', return_train_score='warn')
 	clf.fit(X_train, Y_train)
 	x = (clf.best_params_ )
 	print x
-#	exit()
 	model.set_params(**x)
 	model.fit(X_train, Y_train)
 #	print model.get_params(deep=True)
 	pred_test 	= model.predict(X_test)
 	pred_train 	= model.predict(X_train)
-	out.append(list(pred_train))
-#	print out
 	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
 	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
 	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
@@ -366,7 +370,7 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	if CALCULATE_RETURNS == 'y':
 		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
 	print ('------------------------------------------')
-	return accuracy[2][0]
+	return accuracy[2][0], pred_test
 
 def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model 				= RandomForestClassifier(n_estimators=301, criterion='gini', max_depth=40, min_samples_split=2, min_samples_leaf=10,
@@ -374,9 +378,13 @@ def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 									 min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
 									 warm_start=False, class_weight={1:1,-1:1.15})
 	relevant_features 	= FeatureSelection(X_train, Y_train, model, N_FEATURES)
-	param_grid =  [{'min_samples_leaf':[int(1.7**i+1) for i in range(2)], 'min_samples_split':[int(1.7**i)+1 for i in range(2)]}]
+	cv = TimeSeriesSplit(n_splits=3)
+#	cv = 3
+	min_samples_leaf = [50*i for i in range(1,7)]
+	min_samples_split = [i*2 for i in range(1,10)]
+	param_grid =  [{'min_samples_leaf':min_samples_leaf, 'min_samples_split':min_samples_split}]
 	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=4, iid=True, 
-									refit='best_score_', cv=TimeSeriesSplit(n_splits=5), verbose=0, pre_dispatch='2*n_jobs', 
+									refit='best_score_', cv=cv, verbose=0, pre_dispatch='2*n_jobs', 
 									error_score='raise', return_train_score='warn')
 	clf.fit(X_train, Y_train)
 	x = (clf.best_params_ )
@@ -390,9 +398,6 @@ def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model.fit(X_train_, Y_train)
 	pred_test 		= model.predict(X_test_)
 	pred_train 		= model.predict(X_train_)
-	t = out
-#	out_ = np.vstack(t,pred_test)
-	out.append(list(pred_test))
 	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
 	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
 	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
@@ -401,7 +406,7 @@ def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	if CALCULATE_RETURNS == 'y':
 		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
 	print ('------------------------------------------')
-	return accuracy[2][0]
+	return accuracy[2][0], pred_test
 
 def RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model 				= ExtraTreesClassifier()
@@ -428,11 +433,22 @@ def FeatureSelection(X_train, Y_train, model, n):
 		relevant_features = [True]*X_train.shape[1]
 	return relevant_features
 
-def SelectImportantFeatures(X_train, Y_train):
-	model = ExtraTreesClassifier()
-	model.fit(X_train,Y_train)
-	#model.fit(X_train[:-100], Y_train[:-100])
-	#if accuracy_score()
+def SelectFeaturesRF(X_train, Y_train):
+	model 				= RandomForestClassifier(n_estimators=301, criterion='gini', max_depth=40, min_samples_split=2, min_samples_leaf=10,
+									 min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.00, 
+									 min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
+									 warm_start=False, class_weight={1:1,-1:1.15})
+	cv 					= TimeSeriesSplit(n_splits=3)
+	min_samples_leaf 	= [10*i for i in range(1,10)]
+	min_samples_split 	= [i*2 for i in range(1,20)]
+	param_grid 			=  [{'min_samples_leaf':min_samples_leaf, 'min_samples_split':min_samples_split}]
+	clf 				= model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=-1, iid=True, 
+									refit='best_score_', cv=cv, verbose=0, pre_dispatch='2*n_jobs', 
+									error_score='raise', return_train_score='warn')
+	clf.fit(X_train, Y_train)
+	x = (clf.best_params_ )
+	model.set_params(**x)
+	model.fit(X_train, Y_train)
 	return np.argsort(model.feature_importances_)
 
 # call to the main function
