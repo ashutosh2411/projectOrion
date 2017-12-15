@@ -40,7 +40,7 @@ X_COLS = [37,38,36,48,47,45,40,57,46,44,73]
 X_TRAIN_START		= 50
 X_TRAIN_END			= 1050						# 50 means 50th row in excel
 X_TEST_START		= 1050				# end is included
-X_TEST_END			= 1250
+X_TEST_END			= 1150
 Y_COLS 	 			= 121				# Y to be predicted											# 
 
 CALCULATE_RETURNS	= 'y'				# 'y' for yes, anything else otherwise
@@ -57,14 +57,14 @@ X_TEST_END 		= X_TEST_END + 1
 # Input: file name
 def MAIN(file):
 	data 		= np.genfromtxt(file ,delimiter = ',' , autostrip = True)
-	for i in range (1):
+	for i in range (10):
 		if SPLIT_RANDOM == 'y':
 			X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START:X_TRAIN_END,X_COLS], data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
 		else:
-			X_train 	= data[X_TRAIN_START+i*50:X_TRAIN_END+i*50,X_COLS]
-			Y_train 	= data[X_TRAIN_START+i*50:X_TRAIN_END+i*50,[Y_COLS,RETURNS_COLS]]
-			X_test 		= data[X_TEST_START+i*50:X_TEST_END+i*50,X_COLS]
-			Y_test 		= data[X_TEST_START+i*50:X_TEST_END+i*50,[Y_COLS,RETURNS_COLS]]	
+			X_train 	= data[X_TRAIN_START+i*100:X_TRAIN_END+i*100,X_COLS]
+			Y_train 	= data[X_TRAIN_START+i*100:X_TRAIN_END+i*100,[Y_COLS,RETURNS_COLS]]
+			X_test 		= data[X_TEST_START+i*100:X_TEST_END+i*100,X_COLS]
+			Y_test 		= data[X_TEST_START+i*100:X_TEST_END+i*100,[Y_COLS,RETURNS_COLS]]	
 		X_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
 		Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
 		X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
@@ -358,9 +358,11 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#for i in range(1,30):
 	#custom_score = make_scorer(my_own_accuracy )
-	G_range_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.28,0.75,1]+range(10,140)
+	#G_range_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.28,0.75,1]+range(10,140)
+	G_range_ = [1]
 	G_range = [1.0/i for i in G_range_]
-	C_range = [0.5,1,2,7,8,10,15,50,100,150,500,700,1000,2500,10000]
+	#C_range = [0.5,1,2,7,8,10,15,50,100,150,500,700,1000,2500,10000]
+	C_range = [1000]
 	c_array = []
 	g_array = [] 
 	actual_dist_array = []
@@ -385,7 +387,7 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#print x
 	#model.set_params(**x)
 	
-			model 			= SVC(C = c, kernel = 'rbf', gamma = g)
+			model 			= SVC(C = 1000, kernel = 'rbf', gamma = 1)
 
 			model.fit(X_train, Y_train)
 			pred_train 	= model.predict(X_train)
@@ -422,7 +424,10 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	predicted_test_array = np.asarray(predicted_test_array).T
 	actual_dist_array = np.asarray(actual_dist_array).T
 	out = np.vstack((c_array,g_array,actual_dist_array,predicted_train_array,predicted_test_array,predicted_train_acc_array,predicted_test_acc_array,ret_pt_tot_train,ret_pt_cor_inc_train,ret_pt_tot_test,ret_pt_cor_inc_test))
-	out = out.T
+	#out = out.T
+	#header = ['c','gamma','dist_plus_actual','dist_minus_act','pred_plus_train','pred_minus_train','pred_plus_test','pred_minus_test','pred_tain_accuracy_tot','pred_train_acc_plus','pred_train_acc_minus','pre_test_acc_tot','pred_test_acc_plus','pred_test_acc_minus','ret_pt_tot_train','ret_pt_tot_plus','ret_pt_train_minus','ret_pt_cor_train','ret_pt_inc_train','rt_pt_tot_test','rt_pt_plus_test','rt_pt_minus_test','rt_pt_cor_test','ret_pt_inc_test']	
+	#header = np.asarray(header)
+	#out = np.vstack((header,out))
 	np.savetxt("c_gaama.csv", out.T, delimiter=",")
 
 	return(accuracy[2][0])
