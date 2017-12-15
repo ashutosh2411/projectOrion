@@ -20,7 +20,7 @@ from sklearn.model_selection import cross_val_score, TimeSeriesSplit
 from sklearn.metrics import confusion_matrix
 from sklearn import model_selection
 from sklearn.decomposition import PCA
-clf = id3.Id3Estimator()
+
 
 
 ####################################
@@ -36,11 +36,11 @@ def r(l,u):
 	return range(l, u+1)
 
 #X_COLS 				= r(2,27)+r(28,43)+r(44,59)+r(60,75)+r(76,91)+r(92,107)+r(108,113)+r(114,119)			# both included; 2 means column C in excel
-X_COLS = [37,38,36,48,47,45,57,40,73,46,44]
+X_COLS = [37,38,36,48,47,45,40,57,46,44,73]
 X_TRAIN_START		= 50
 X_TRAIN_END			= 1050						# 50 means 50th row in excel
-X_TEST_START		= 1051				# end is included
-X_TEST_END			= 1551
+X_TEST_START		= 1050				# end is included
+X_TEST_END			= 1250
 Y_COLS 	 			= 121				# Y to be predicted											# 
 
 CALCULATE_RETURNS	= 'y'				# 'y' for yes, anything else otherwise
@@ -57,27 +57,28 @@ X_TEST_END 		= X_TEST_END + 1
 # Input: file name
 def MAIN(file):
 	data 		= np.genfromtxt(file ,delimiter = ',' , autostrip = True)
-	if SPLIT_RANDOM == 'y':
-		X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START:X_TRAIN_END,X_COLS], data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
-	else:
-		X_train 	= data[X_TRAIN_START:X_TRAIN_END,X_COLS]
-		Y_train 	= data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]]
-		X_test 		= data[X_TEST_START:X_TEST_END,X_COLS]
-		Y_test 		= data[X_TEST_START:X_TEST_END,[Y_COLS,RETURNS_COLS]]	
-	X_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
-	Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
-	X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
-	Y_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_test)
-	scaler		= MinMaxScaler().fit(X_train)
-	X_train 	= scaler.transform(X_train)
-	X_test 		= scaler.transform(X_test)
-	if DO_PCA == 'y':
-		X = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
-		X_train = X[:len(X_train)]
-		X_test = X[len(X_train):]
-	Abs_train 	= Y_train[:,1]
-	Abs_test 	= Y_test[:,1]
-	RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0],data)
+	for i in range (1):
+		if SPLIT_RANDOM == 'y':
+			X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START:X_TRAIN_END,X_COLS], data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
+		else:
+			X_train 	= data[X_TRAIN_START+i*50:X_TRAIN_END+i*50,X_COLS]
+			Y_train 	= data[X_TRAIN_START+i*50:X_TRAIN_END+i*50,[Y_COLS,RETURNS_COLS]]
+			X_test 		= data[X_TEST_START+i*50:X_TEST_END+i*50,X_COLS]
+			Y_test 		= data[X_TEST_START+i*50:X_TEST_END+i*50,[Y_COLS,RETURNS_COLS]]	
+		X_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
+		Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
+		X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
+		Y_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_test)
+		scaler		= MinMaxScaler().fit(X_train)
+		X_train 	= scaler.transform(X_train)
+		X_test 		= scaler.transform(X_test)
+		if DO_PCA == 'y':
+			X = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
+			X_train = X[:len(X_train)]
+			X_test = X[len(X_train):]
+		Abs_train 	= Y_train[:,1]
+		Abs_test 	= Y_test[:,1]
+		RunAllModels(Abs_train, Abs_test, X_train, Y_train[:,0], X_test, Y_test[:,0])
 def my_own_accuracy(y_true, y_pred):
 	plus = 1.0
 	minus = 1.0
@@ -102,46 +103,21 @@ def my_own_accuracy(y_true, y_pred):
 		print(accuracy_score(y_true,y_pred))
 		return(accuracy_score(y_true,y_pred))
 		print('-----------------------------')
-def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test,data):
+def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test):
 	#RunLR (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LR_')
 	#RunLDA(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LDA')
 	#RunLAS(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LAS')
 	#RunRID(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RID')
 	#RunNB (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'NB_')
 	#RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'KNN')
-	'''s = 0.0
-	for i in range(1):
-		X_train 	= data[X_TRAIN_START + i*70:X_TRAIN_END+i*70,X_COLS]
-		Y_train 	= data[X_TRAIN_START+i*70:X_TRAIN_END+i*70,[Y_COLS,RETURNS_COLS]]
-		Abs_train 	= Y_train[:,1]
-		Y_train = Y_train[:,0]
-		X_test 		= data[X_TEST_START+i*70:X_TEST_END+i*70,X_COLS]
-		Y_test 		= data[X_TEST_START+i*70:X_TEST_END+i*70,[Y_COLS,RETURNS_COLS]]	
-		Abs_test 	= Y_test[:,1]
-		Y_test = Y_test[:,0]
-		p =  RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
-		print p
-		
-		s = s + p
-	print('average' + str(s/10))'''
-	#RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
-	for i in range(10):
-		X_train 	= data[X_TRAIN_START + i*100:X_TRAIN_END+i*100,X_COLS]
-		X_test 		= data[X_TEST_START+i*100:X_TEST_END+i*100,X_COLS]
-		Y_train 	= data[X_TRAIN_START+i*100:X_TRAIN_END+i*100,[Y_COLS,RETURNS_COLS]]
-		Y_test 		= data[X_TEST_START+i*100:X_TEST_END+i*100,[Y_COLS,RETURNS_COLS]]	
-		X_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
-		Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
-		X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
-		Y_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_test)
-		scaler		= MinMaxScaler().fit(X_train)
-		X_train 	= scaler.transform(X_train)
-		X_test 		= scaler.transform(X_test)
-		Abs_train 	= Y_train[:,1]
-		Y_train = Y_train[:,0]
-		Abs_test 	= Y_test[:,1]
-		Y_test = Y_test[:,0]
-		RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
+	s = 0.0
+	p =  RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
+		#q = RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
+	s = s + p
+		#s1 = s1 + q
+	print('average svm ' + str(s/10))
+	#print('average rf ' + str(s/10))
+	#RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 	#RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
 
 def ComputeDistribution(Y_train, Y_test):
@@ -191,6 +167,7 @@ def ComputeReturns(Abs_test, Abs_train, pred_test, pred_train,  Y_test, Y_train,
 	print (name+'_ret.p.t_train_[cor, incor] : '+'%.3f %%,\t %.3f %%'%ret_cor_incor_train)
 	print (name+'_ret.p.t_test_[T,+,-]       : '+'%.3f %%,\t %.3f %%,\t %.3f %%'%ret_total_test)
 	print (name+'_ret.p.t_test_[cor, incor]  : '+'%.3f %%,\t %.3f %%'%ret_cor_incor_test)
+	return (ret_total_train,ret_cor_incor_train, ret_total_test,ret_cor_incor_test)
 
 def Returns(Abs, pred, Y):
 # s0: total per trade returns
@@ -380,28 +357,77 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 
 def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#for i in range(1,30):
-	custom_score = make_scorer(my_own_accuracy )
-	model 			= SVC()
-	C_range = [1000]
-	gamma_range = [1.0/i for i in range(50,80)]
-	param_grid =  [{ 'C': C_range, 'gamma': gamma_range, 'kernel': ['rbf']}]
-	clf = model_selection.GridSearchCV(model, param_grid, scoring=custom_score)
-	clf.fit(X_train, Y_train)
-	x = (clf.best_params_ )
-	print x
-	model.set_params(**x)
-	model.fit(X_train, Y_train)
-	pred_test 	= model.predict(X_test)
-	pred_train 	= model.predict(X_train)
+	#custom_score = make_scorer(my_own_accuracy )
+	G_range_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.28,0.75,1]+range(10,140)
+	G_range = [1.0/i for i in G_range_]
+	C_range = [0.5,1,2,7,8,10,15,50,100,150,500,700,1000,2500,10000]
+	c_array = []
+	c_array.append('c_value')
+	g_array = [] 
+	g_array.append('gamma_value')
+	actual_dist_array = []
+	actual_dist_array.append(['plus_dist','minus_dist'])
+	predicted_test_array =[]
+	predicted_train_array =[]
+	predicted_train_array.append(['total acc train','plus_acc_train','plus_acc_train'])
+	predicted_train_acc_array =[]
+	predicted_test_acc_array = []
+	ret_pt_tot_train =[]
+	ret_pt_cor_inc_train=[]
+	ret_pt_tot_test=[]
+	ret_pt_cor_inc_test=[]
+	for c in C_range:
+		for g in G_range:
+			c_array.append(c)
+			g_array.append(g)
+			print 'c ' +str(c)
+			print 'g ' +str(g)
+	#param_grid =  [{ 'C': C_range,'kernel': ['rbf']}]
+	#clf = model_selection.GridSearchCV(model, param_grid, cv = TimeSeriesSplit(n_splits = 5))
+	#clf.fit(X_train, Y_train)
+	#x = (clf.best_params_ )
+	#print x
+	#model.set_params(**x)
 	
-	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
-	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
-	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
-	accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
-	print(' ')
-	if CALCULATE_RETURNS == 'y':
-		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
-	print ('------------------------------------------')
+			model 			= SVC(C = c, kernel = 'rbf', gamma = g)
+
+			model.fit(X_train, Y_train)
+			pred_train 	= model.predict(X_train)
+			pred_test 	= model.predict(X_test)
+	
+			cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
+			cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
+			actual_dist 	= ComputeDistribution(Y_train, Y_test)	
+			actual_dist_array.append(list(actual_dist))
+			
+			accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
+			predicted_test_array.append(list(accuracy[0]))
+			predicted_train_array.append(list(accuracy[1]))
+			predicted_test_acc_array.append(list(accuracy[2])) 
+			predicted_train_acc_array.append(list(accuracy[3]))
+
+			print(' ')
+			if CALCULATE_RETURNS == 'y':
+				returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
+				ret_pt_tot_train.append(list(returns[0]))
+				ret_pt_cor_inc_train.append(list(returns[1]))
+				ret_pt_tot_test.append(list(returns[2]))
+				ret_pt_cor_inc_test.append(list(returns[3]))
+			print ('------------------------------------------')
+	c_array = np.asarray(c_array).T
+	g_array = np.asarray(g_array).T
+	ret_pt_tot_train = np.asarray(ret_pt_tot_train).T
+	ret_pt_tot_test = np.asarray(ret_pt_tot_test).T
+	ret_pt_cor_inc_train = np.asarray(ret_pt_cor_inc_train).T
+	ret_pt_cor_inc_test = np.asarray(ret_pt_cor_inc_test).T
+	predicted_train_array = np.asarray(predicted_train_array).T
+	predicted_train_acc_array = np.asarray(predicted_train_acc_array).T
+	predicted_test_acc_array = np.asarray(predicted_test_acc_array).T
+	predicted_test_array = np.asarray(predicted_test_array).T
+	actual_dist_array = np.asarray(actual_dist_array).T
+	out = np.vstack((c_array,g_array,actual_dist_array,predicted_train_array,predicted_test_array,predicted_train_acc_array,predicted_test_acc_array,ret_pt_tot_train,ret_pt_cor_inc_train,ret_pt_tot_test,ret_pt_cor_inc_test))
+	np.savetxt("c_gaama.csv", out.T, delimiter=",")
+
 	return(accuracy[2][0])
 #to calculate accuracy when test is predicted over a threshold
 def calculate_acc(y_pred, 	y_true):
@@ -447,16 +473,16 @@ def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model.fit(X_train_, Y_train)
 	pred_prob_train = model.predict_proba(X_train_)
 	pred_prob_test = model.predict_proba(X_test_)
-	threshold = custom_threshold(pred_prob_train,actual_dist)
-	pred_test = [0]*len(Y_test)
-	for i in range(len(Y_test)):
-		if(pred_prob_test[i][0] > threshold[0]):
-			pred_test[i] = -1
-		elif(pred_prob_test[i][2] > threshold[1]):
-			pred_test[i] = 1
-	pred_thres_array = np.vstack((X_test_.T, Abs_test, Y_test, pred_test))
-	np.savetxt("pre_out_nifty_200.csv", pred_thres_array.T, delimiter=",")
-	calculate_acc(pred_test, Y_test)
+#	threshold = custom_threshold(pred_prob_train,actual_dist)
+#	pred_test = [0]*len(Y_test)
+#	for i in range(len(Y_test)):
+#		if(pred_prob_test[i][0] > threshold[0]):
+#			pred_test[i] = -1
+#		elif(pred_prob_test[i][2] > threshold[1]):
+#			pred_test[i] = 1
+#	pred_thres_array = np.vstack((X_test_.T, Abs_test, Y_test, pred_test))
+#	np.savetxt("pre_out_nifty_200.csv", pred_thres_array.T, delimiter=",")
+#	calculate_acc(pred_test, Y_test)
 
 	pred_test 		= model.predict(X_test_)
 	pred_train 		= model.predict(X_train_)
@@ -469,6 +495,7 @@ def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	if CALCULATE_RETURNS == 'y':
 		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
 	print ('------------------------------------------')
+	return(accuracy[2][0])
 
 def RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	model 				= ExtraTreesClassifier()

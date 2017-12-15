@@ -15,7 +15,7 @@ def main(filename):
 	dataset = pandas.read_csv(in_address)
 	data = dataset.values
 	date_ycc = data[:,0]
-	date_yoc = np.hstack((data[1:,0],'11-11-1911'))
+	date_yoc = np.hstack((data[1:,0],'11-11-191'1))
 	day_ycc = day_to_date(date_ycc)
 	day_yoc = day_to_date(date_yoc)
 

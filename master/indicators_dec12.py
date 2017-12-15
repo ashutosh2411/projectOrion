@@ -50,17 +50,6 @@ def main(filename):
 	t1 = np.hstack((yoc(o,c)[1:],np.nan))
 	t2 = np.hstack((compute_labels(calculate_percentile(yoc(o,c),2),yoc(o,c))[1:],np.nan))
 	t3 = np.hstack((compute_labels(calculate_percentile(yoc(o,c),1),yoc(o,c))[1:],np.nan))
-	o_o = o
-	h_h = h
-	l_l = l
-	c_c = c
-	v_v = v
-	alph = 0.8
-	o = Smoothen(o, alpha)
-	h = Smoothen(h, alpha)
-	l = Smoothen(l, alpha)
-	c = Smoothen(c, alpha)
-	v = Smoothen(v, alpha)
 	i = []
 	names = []
 	out = np.vstack((t1,t2,t3,out[1:]))
@@ -159,11 +148,6 @@ def main(filename):
 	array_oc.to_csv(filename[:-4] + '_yoc.csv',index = False)
 
 # Exponential smoothening Manish's
-def Smoothen(x, alpha):
-	x_ = x
-	alpha = float(alpha)
-	for i in range(1,len(x)):
-		x_[i] = x[i]*alpha, x_[i-1]*(1-alpha)
 
 #converts list of days to list of dates
 def day_to_date(date):
