@@ -57,7 +57,7 @@ X_TEST_END 		= X_TEST_END + 1
 # Input: file name
 def MAIN(file):
 	data 		= np.genfromtxt(file ,delimiter = ',' , autostrip = True)
-	for i in range (10):
+	for i in range (5):
 		if SPLIT_RANDOM == 'y':
 			X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START:X_TRAIN_END,X_COLS], data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
 		else:
@@ -115,7 +115,7 @@ def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test):
 		#q = RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 	s = s + p
 		#s1 = s1 + q
-	print('average svm ' + str(s/10))
+	#print('average svm ' + str(s/10))
 	#print('average rf ' + str(s/10))
 	#RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 	#RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
@@ -365,77 +365,35 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#C_range = [1000]
 	c_array = []
 	g_array = []
-	estimator = SVC()
-	param_distributions = [{'C': C_range,'gamma': G_range ,'kernel': ['rbf']} ]
-	clf = RandomizedSearchCV(estimator, param_distributions, n_iter=10, cv=TimeSeriesSplit(n_splits = 10)) 
-	clf.fit(X_train,Y_train)
-	x = clf.best_params_
-	print(x)
-	actual_dist_array = []
-	predicted_test_array =[]
-	predicted_train_array =[]
-	predicted_train_acc_array =[]
-	predicted_test_acc_array = []
-	ret_pt_tot_train =[]
-	ret_pt_cor_inc_train=[]
-	ret_pt_tot_test=[]
-	ret_pt_cor_inc_test=[]
-	for c in C_range:
-		for g in G_range:
-			c_array.append(c)
-			g_array.append(g)
-			print 'c ' +str(c)
-			print 'g ' +str(g)
+	model = SVC()
+	param_distributions = {'C': C_range,'gamma': G_range ,'kernel': ['rbf']} 
+	clf = RandomizedSearchCV(model, param_distributions, n_iter=140, cv=TimeSeriesSplit(n_splits = 10)) 
+
+
 	#param_grid =  [{ 'C': C_range,'kernel': ['rbf']}]
 	#clf = model_selection.GridSearchCV(model, param_grid, cv = TimeSeriesSplit(n_splits = 5))
-	#clf.fit(X_train, Y_train)
-	#x = (clf.best_params_ )
-	#print x
-	#model.set_params(**x)
+	clf.fit(X_train, Y_train)
+	x = (clf.best_params_ )
+	print x
+	model.set_params(**x)
 	
-			model 			= SVC(C = 1000, kernel = 'rbf', gamma = 1)
 
-			model.fit(X_train, Y_train)
-			pred_train 	= model.predict(X_train)
-			pred_test 	= model.predict(X_test)
+	model.fit(X_train, Y_train)
+	pred_train 	= model.predict(X_train)
+	pred_test 	= model.predict(X_test)
+
+	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
+	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
+	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
 	
-			cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
-			cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
-			actual_dist 	= ComputeDistribution(Y_train, Y_test)	
-			actual_dist_array.append(list(actual_dist))
-			
-			accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
-			predicted_test_array.append(list(accuracy[0]))
-			predicted_train_array.append(list(accuracy[1]))
-			predicted_test_acc_array.append(list(accuracy[2])) 
-			predicted_train_acc_array.append(list(accuracy[3]))
-
-			print(' ')
-			if CALCULATE_RETURNS == 'y':
-				returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
-				print returns
-				ret_pt_tot_train.append(list(returns[0]))
-				ret_pt_cor_inc_train.append(list(returns[1]))
-				ret_pt_tot_test.append(list(returns[2]))
-				ret_pt_cor_inc_test.append(list(returns[3]))
-			print ('------------------------------------------')
-	c_array = np.asarray(c_array).T
-	g_array = np.asarray(g_array).T
-	ret_pt_tot_train = np.asarray(ret_pt_tot_train).T
-	ret_pt_tot_test = np.asarray(ret_pt_tot_test).T
-	ret_pt_cor_inc_train = np.asarray(ret_pt_cor_inc_train).T
-	ret_pt_cor_inc_test = np.asarray(ret_pt_cor_inc_test).T
-	predicted_train_array = np.asarray(predicted_train_array).T
-	predicted_train_acc_array = np.asarray(predicted_train_acc_array).T
-	predicted_test_acc_array = np.asarray(predicted_test_acc_array).T
-	predicted_test_array = np.asarray(predicted_test_array).T
-	actual_dist_array = np.asarray(actual_dist_array).T
-	out = np.vstack((c_array,g_array,actual_dist_array,predicted_train_array,predicted_test_array,predicted_train_acc_array,predicted_test_acc_array,ret_pt_tot_train,ret_pt_cor_inc_train,ret_pt_tot_test,ret_pt_cor_inc_test))
-	#out = out.T
+	accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
+	
+	if CALCULATE_RETURNS == 'y':
+		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
+	print ('------------------------------------------')
 	#header = ['c','gamma','dist_plus_actual','dist_minus_act','pred_plus_train','pred_minus_train','pred_plus_test','pred_minus_test','pred_tain_accuracy_tot','pred_train_acc_plus','pred_train_acc_minus','pre_test_acc_tot','pred_test_acc_plus','pred_test_acc_minus','ret_pt_tot_train','ret_pt_tot_plus','ret_pt_train_minus','ret_pt_cor_train','ret_pt_inc_train','rt_pt_tot_test','rt_pt_plus_test','rt_pt_minus_test','rt_pt_cor_test','ret_pt_inc_test']	
 	#header = np.asarray(header)
 	#out = np.vstack((header,out))
-	np.savetxt("c_gaama.csv", out.T, delimiter=",")
 
 	return(accuracy[2][0])
 #to calculate accuracy when test is predicted over a threshold
