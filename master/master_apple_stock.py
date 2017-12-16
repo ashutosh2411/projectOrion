@@ -25,6 +25,7 @@ from sklearn.decomposition import PCA
 
 #################################################################################################
 ################# CHANGES TO BE MADE ONLY IN FOLLOWING PART #####################################
+somename = '950_unfiltered'
 filename = 'AAPL_2001_to_2017_ycc.csv'
 DO_PCA 					= 'n'
 SPLIT_RANDOM			= 'n'				# 'y' for randomized split, anything else otherwise
@@ -41,14 +42,14 @@ def r(l,u):
 #X_COLS = [39,6,44,49,51,48,31,32,33,45,69,41,42,43,76,60,67,47,63,62,116,117,118,119]
 X_COLS 				= r(31,56)
 X_TRAIN_START		= 2267
-X_TRAIN_END			= 2267+1000						# 50 means 50th row in excel
-X_TEST_START		= 2267+1001							# end is included
-X_TEST_END			= 2267+1200
+X_TRAIN_END			= 2267+950						# 50 means 50th row in excel
+X_TEST_START		= 2267+951						# end is included
+X_TEST_END			= 2267+1150
 
-Y_COLS 	 			= 66				# Y to be predicted													# 
+Y_COLS 	 			= 58				# Y to be predicted													# 
 print Y_COLS
 CALCULATE_RETURNS	= 'y'				# 'y' for yes, anything else otherwise
-RETURNS_COLS 		= 65				# To calculate returns. size same as Y_TO_PREDICT 	# If CALCULATE_RETURNS is not 'y', put any valid column in this one
+RETURNS_COLS 		= 57				# To calculate returns. size same as Y_TO_PREDICT 	# If CALCULATE_RETURNS is not 'y', put any valid column in this one
 
 
 COL_TOBE_SCALED 	= [32,6]			# 32 = OBV, 6 = Volume_today
@@ -60,8 +61,8 @@ X_TEST_END 		= X_TEST_END + 1
 def MAIN(file):
 	data 		= np.genfromtxt(file ,delimiter = ',' , autostrip = True)
 	s=0.0
-	l=1
-	windowSize = 10
+	l=5
+	windowSize = 200
 	out = []
 	for i in range(l):
 		print i+1
@@ -123,8 +124,8 @@ def RunAllModels(Abs_train, Abs_test ,X_train, Y_train, X_test, Y_test):
 #	for i in range(1,l):
 #		s = s + RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 #		print i
-	RunSVM_(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
-#	return RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
+#	RunSVM_(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
+	return RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'SVM')
 #	print 'average : ' +str(s/l) 
 #	return RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 #	RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
@@ -356,11 +357,10 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 def RunSVM_(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#for i in range(1,30):
 	#custom_score = make_scorer(my_own_accuracy )
-	G_range_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.28,0.75,1]+range(10,140)
-	#G_range_ = [1]
-	G_range = [1.0/i for i in G_range_]
-	C_range = [10,15,50,100,150,500,700,1000,2500,10000]
-	#C_range = [1000]
+	G_range = [1]
+	#G_range = [1.0/i for i in G_range_]
+	C_range = [120]
+	#C_range = [i*100 for i in range(5,50)]+[i*5 for i in range(1,100)]
 	c_array = []
 	g_array = [] 
 	actual_dist_array = []
@@ -397,19 +397,19 @@ def RunSVM_(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 
 			print(' ')
 			print ('------------------------------------------')
-			if accuracy[0][0] >= (actual_dist[0] -5) and accuracy[0][0] <= (actual_dist[0] +5) and accuracy[2][0] > 55 and accuracy[2][1] > 52 and accuracy[2][2] > 52:
-				returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
-				c_array.append(c)
-				g_array.append(g)
-				actual_dist_array.append(list(actual_dist))
-				predicted_test_array.append(list(accuracy[0]))
-				predicted_train_array.append(list(accuracy[1]))
-				predicted_test_acc_array.append(list(accuracy[2])) 
-				predicted_train_acc_array.append(list(accuracy[3]))
-				ret_pt_tot_train.append(list(returns[0]))
-				ret_pt_tot_test.append(list(returns[2]))
-				ret_pt_cor_inc_train.append(list(returns[1]))
-				ret_pt_cor_inc_test.append(list(returns[3]))
+#			if accuracy[0][0] >= (actual_dist[0] -10) and accuracy[0][0] <= (actual_dist[0] +10) and accuracy[2][0] >= 53 and accuracy[2][1] >= 50 and accuracy[2][2] >= 50:
+			returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
+			c_array.append(c)
+			g_array.append(g)
+			actual_dist_array.append(list(actual_dist))
+			predicted_test_array.append(list(accuracy[0]))
+			predicted_train_array.append(list(accuracy[1]))
+			predicted_test_acc_array.append(list(accuracy[2])) 
+			predicted_train_acc_array.append(list(accuracy[3]))
+			ret_pt_tot_train.append(list(returns[0]))
+			ret_pt_tot_test.append(list(returns[2]))
+			ret_pt_cor_inc_train.append(list(returns[1]))
+			ret_pt_cor_inc_test.append(list(returns[3]))
 	c_array = np.asarray(c_array).T
 	g_array = np.asarray(g_array).T
 	ret_pt_tot_train = np.asarray(ret_pt_tot_train).T
@@ -426,24 +426,9 @@ def RunSVM_(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#header = ['c','gamma','dist_plus_actual','dist_minus_act','pred_plus_train','pred_minus_train','pred_plus_test','pred_minus_test','pred_tain_accuracy_tot','pred_train_acc_plus','pred_train_acc_minus','pre_test_acc_tot','pred_test_acc_plus','pred_test_acc_minus','ret_pt_tot_train','ret_pt_tot_plus','ret_pt_train_minus','ret_pt_cor_train','ret_pt_inc_train','rt_pt_tot_test','rt_pt_plus_test','rt_pt_minus_test','rt_pt_cor_test','ret_pt_inc_test']	
 	#header = np.asarray(header)
 	#out = np.vstack((header,out))
-	np.savetxt("c_gaama_filtered.csv", out.T, delimiter=",")
-
-def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
-	model 			= SVC(C=1000, kernel='rbf', gamma=1)
-	gs = [1.0/i for i in range(1,100)]
-	cs = [10**i for i in range(2,4)]
-	param_grid =  [{'C': cs, 'gamma': gs}]
-#	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=6, iid=True, 
-#									refit='best_score_', cv = TimeSeriesSplit(n_splits = 5), verbose=0, pre_dispatch='2*n_jobs', 
-#									error_score='raise', return_train_score='warn')
-#	clf.fit(X_train, Y_train)
-#	x = (clf.best_params_ )
-#	print x
-#	model.set_params(**x)
-#	print model.get_params(deep=True)
-	gs_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.28,0.75,1]+range(10,140)
-	gs = [1.0/i for i in gs_]
-	cs = [10,15,50,100,150,500,700,1000,2500,10000]
+	G_range = [.35]
+	#G_range = [1.0/i for i in G_range_]
+	C_range = [1300]
 	c_array = []
 	g_array = [] 
 	actual_dist_array = []
@@ -455,11 +440,8 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	ret_pt_cor_inc_train=[]
 	ret_pt_tot_test=[]
 	ret_pt_cor_inc_test=[]
-	
-	for c in cs:
-		for g in gs:
-			c_array.append(c)
-			g_array.append(g)
+	for c in C_range:
+		for g in G_range:
 			print 'c ' +str(c)
 			print 'g ' +str(g)
 	#param_grid =  [{ 'C': C_range,'kernel': ['rbf']}]
@@ -478,24 +460,30 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 			cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
 			cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
 			actual_dist 	= ComputeDistribution(Y_train, Y_test)	
-			actual_dist_array.append(list(actual_dist))
 			
 			accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
+
+			print(' ')
+			print ('------------------------------------------')
+#			if accuracy[0][0] >= (actual_dist[0] -10) and accuracy[0][0] <= (actual_dist[0] +10) and accuracy[2][0] >= 53 and accuracy[2][1] >= 50 and accuracy[2][2] >= 50:
+			returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
+			c_array.append(c)
+			g_array.append(g)
+			actual_dist_array.append(list(actual_dist))
 			predicted_test_array.append(list(accuracy[0]))
 			predicted_train_array.append(list(accuracy[1]))
 			predicted_test_acc_array.append(list(accuracy[2])) 
 			predicted_train_acc_array.append(list(accuracy[3]))
-
-			print(' ')
-			if CALCULATE_RETURNS == 'y':
-				returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
-				ret_pt_tot_train.append(list(returns[0]))
-				ret_pt_cor_inc_train.append(list(returns[1]))
-				ret_pt_tot_test.append(list(returns[2]))
-				ret_pt_cor_inc_test.append(list(returns[3]))
-			print ('------------------------------------------')
+			ret_pt_tot_train.append(list(returns[0]))
+			ret_pt_tot_test.append(list(returns[2]))
+			ret_pt_cor_inc_train.append(list(returns[1]))
+			ret_pt_cor_inc_test.append(list(returns[3]))
 	c_array = np.asarray(c_array).T
 	g_array = np.asarray(g_array).T
+	ret_pt_tot_train = np.asarray(ret_pt_tot_train).T
+	ret_pt_tot_test = np.asarray(ret_pt_tot_test).T
+	ret_pt_cor_inc_train = np.asarray(ret_pt_cor_inc_train).T
+	ret_pt_cor_inc_test = np.asarray(ret_pt_cor_inc_test).T
 	predicted_train_array = np.asarray(predicted_train_array).T
 	predicted_train_acc_array = np.asarray(predicted_train_acc_array).T
 	predicted_test_acc_array = np.asarray(predicted_test_acc_array).T
@@ -506,7 +494,90 @@ def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	#header = ['c','gamma','dist_plus_actual','dist_minus_act','pred_plus_train','pred_minus_train','pred_plus_test','pred_minus_test','pred_tain_accuracy_tot','pred_train_acc_plus','pred_train_acc_minus','pre_test_acc_tot','pred_test_acc_plus','pred_test_acc_minus','ret_pt_tot_train','ret_pt_tot_plus','ret_pt_train_minus','ret_pt_cor_train','ret_pt_inc_train','rt_pt_tot_test','rt_pt_plus_test','rt_pt_minus_test','rt_pt_cor_test','ret_pt_inc_test']	
 	#header = np.asarray(header)
 	#out = np.vstack((header,out))
-	np.savetxt("c_gaama.csv", out.T, delimiter=",")	
+	
+	np.savetxt("c_gaama_"+somename+".csv", out.T, delimiter=",")
+
+def RunSVM(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
+	model 			= SVC(C=1000, kernel='rbf', gamma=1)
+	gs_ = [1.7**i for i in range(1,20)]
+	gs = [1.0/i for i in gs_]
+	cs = [i*1000 for i in range(1,30)]+[i*10 for i in range(1,100)]
+	#cs = [10**i for i in range(2,4)]
+	param_grid =  [{'C': cs, 'gamma': gs}]
+	clf = model_selection.GridSearchCV(model, param_grid, scoring=None, fit_params=None, n_jobs=-1, iid=True, 
+									refit='best_score_', cv = TimeSeriesSplit(n_splits = 2), verbose=0, pre_dispatch='2*n_jobs', 
+									error_score='raise', return_train_score='warn')
+	clf.fit(X_train, Y_train)
+	x = (clf.best_params_ )
+	print x
+#	print model.get_params()
+	model.set_params(**x)
+	model.fit(X_train, Y_train)
+	actual_dist 	= ComputeDistribution(Y_train, Y_test)	
+	pred_train 	= model.predict(X_train)
+	pred_test 	= model.predict(X_test)
+	cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
+	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
+	accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
+	if CALCULATE_RETURNS == 'y':
+		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
+	'''gs_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.28,0.75,1]+range(10,140)
+					gs = [1.0/i for i in gs_]
+					cs = [10,15,50,100,150,500,700,1000,2500,10000]
+					c_array = []
+					g_array = [] 
+					actual_dist_array = []
+					predicted_test_array =[]
+					predicted_train_array =[]
+					predicted_train_acc_array =[]
+					predicted_test_acc_array = []
+					ret_pt_tot_train =[]
+					ret_pt_cor_inc_train=[]
+					ret_pt_tot_test=[]
+					ret_pt_cor_inc_test=[]
+					
+					for c in cs:
+						for g in gs:
+							c_array.append(c)
+							g_array.append(g)
+							print 'c ' +str(c)
+							print 'g ' +str(g)
+					#param_grid =  [{ 'C': C_range,'kernel': ['rbf']}]
+					#clf = model_selection.GridSearchCV(model, param_grid, cv = TimeSeriesSplit(n_splits = 5))
+					#clf.fit(X_train, Y_train)
+					#x = (clf.best_params_ )
+					#print x
+					#model.set_params(**x)
+					
+							model 			= SVC(C = c, kernel = 'rbf', gamma = g)
+				
+					
+							actual_dist_array.append(list(actual_dist))
+							
+							predicted_test_array.append(list(accuracy[0]))
+							predicted_train_array.append(list(accuracy[1]))
+							predicted_test_acc_array.append(list(accuracy[2])) 
+							predicted_train_acc_array.append(list(accuracy[3]))
+				
+							print(' ')
+								ret_pt_tot_train.append(list(returns[0]))
+								ret_pt_cor_inc_train.append(list(returns[1]))
+								ret_pt_tot_test.append(list(returns[2]))
+								ret_pt_cor_inc_test.append(list(returns[3]))
+							print ('------------------------------------------')
+					c_array = np.asarray(c_array).T
+					g_array = np.asarray(g_array).T
+					predicted_train_array = np.asarray(predicted_train_array).T
+					predicted_train_acc_array = np.asarray(predicted_train_acc_array).T
+					predicted_test_acc_array = np.asarray(predicted_test_acc_array).T
+					predicted_test_array = np.asarray(predicted_test_array).T
+					actual_dist_array = np.asarray(actual_dist_array).T
+					out = np.vstack((c_array,g_array,actual_dist_array,predicted_train_array,predicted_test_array,predicted_train_acc_array,predicted_test_acc_array,ret_pt_tot_train,ret_pt_cor_inc_train,ret_pt_tot_test,ret_pt_cor_inc_test))
+					#out = out.T
+					#header = ['c','gamma','dist_plus_actual','dist_minus_act','pred_plus_train','pred_minus_train','pred_plus_test','pred_minus_test','pred_tain_accuracy_tot','pred_train_acc_plus','pred_train_acc_minus','pre_test_acc_tot','pred_test_acc_plus','pred_test_acc_minus','ret_pt_tot_train','ret_pt_tot_plus','ret_pt_train_minus','ret_pt_cor_train','ret_pt_inc_train','rt_pt_tot_test','rt_pt_plus_test','rt_pt_minus_test','rt_pt_cor_test','ret_pt_inc_test']	
+					#header = np.asarray(header)
+					#out = np.vstack((header,out))
+					np.savetxt("c_gaama.csv", out.T, delimiter=",")'''	
 	return accuracy[2][0], pred_test
 
 def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
@@ -515,7 +586,7 @@ def RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 									 min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0, 
 									 warm_start=False, class_weight={1:1,-1:1.15})
 	relevant_features 	= FeatureSelection(X_train, Y_train, model, N_FEATURES)
-	cv = TimeSeriesSplit(n_splits=3)
+	cv = TimeSeriesSplit(n_splits=10)
 #	cv = 3
 	min_samples_leaf = [50*i for i in range(1,7)]
 	min_samples_split = [i*2 for i in range(1,10)]
