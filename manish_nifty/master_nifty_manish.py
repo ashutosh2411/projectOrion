@@ -57,35 +57,39 @@ X_TEST_END 		= X_TEST_END + 1
 # Input: file name
 def MAIN(file):
 	data 		= np.genfromtxt(file ,delimiter = ',' , autostrip = True)
-	for i in range (5):
+	for i in range (10):
 		if SPLIT_RANDOM == 'y':
 			X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START:X_TRAIN_END,X_COLS], data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
 		else:
-			X_train 	= data[X_TRAIN_START+i*100:X_TRAIN_END+i*100,X_COLS]
-			Y_train 	= data[X_TRAIN_START+i*100:X_TRAIN_END+i*100,[Y_COLS,RETURNS_COLS]]
-			X_test 		= data[X_TEST_START+i*100:X_TEST_END+i*100,X_COLS]
-			Y_test 		= data[X_TEST_START+i*100:X_TEST_END+i*100,[Y_COLS,RETURNS_COLS]]	
-			X_validation = data[X_TEST_END+i*100:X_TEST_END+i*100+100,X_COLS]
-			Y_validation = data[X_TEST_END+i*100:X_TEST_END+i*100+100,[Y_COLS,RETURNS_COLS]]
+			X_train 	 = data[X_TRAIN_START + i*100 : X_TRAIN_END + i*100     , X_COLS]
+			Y_train 	 = data[X_TRAIN_START + i*100 : X_TRAIN_END + i*100     , [Y_COLS,RETURNS_COLS]]
+			X_test 		 = data[X_TEST_START  + i*100 : X_TEST_END  + i*100     , X_COLS]
+			Y_test 		 = data[X_TEST_START  + i*100 : X_TEST_END  + i*100     , [Y_COLS,RETURNS_COLS]]	
+			X_validation = data[X_TEST_END    + i*100 : X_TEST_END  + i*100+100 , X_COLS]
+			Y_validation = data[X_TEST_END    + i*100 : X_TEST_END  + i*100+100 , [Y_COLS,RETURNS_COLS]]
 
-		X_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
-		Y_train		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
-		X_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
-		Y_test		= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_test)
+		X_train			= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
+		Y_train			= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
+		X_test			= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_test)
+		Y_test			= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_test)
 		X_validation	= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_validation)
 		Y_validation	= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_validation)
-		scaler		= MinMaxScaler().fit(X_train)
-		X_train 	= scaler.transform(X_train)
-		X_test 		= scaler.transform(X_test)
-		X_validation 		= scaler.transform(X_validation)
+		
+		scaler		 = MinMaxScaler().fit(X_train)
+		X_train 	 = scaler.transform(X_train)
+		X_test 		 = scaler.transform(X_test)
+		X_validation = scaler.transform(X_validation)
+		
 		if DO_PCA == 'y':
-			X = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
+			X       = PCA(n_components=4, copy=True, whiten=False, svd_solver='auto', tol=0.0, iterated_power='auto', random_state=None).fit_transform(np.vstack((X_train,X_test)))
 			X_train = X[:len(X_train)]
-			X_test = X[len(X_train):]
-		Abs_train 	= Y_train[:,1]
-		Abs_test 	= Y_test[:,1]
+			X_test  = X[len(X_train):]
+		
+		Abs_train 	    = Y_train[:,1]
+		Abs_test 	    = Y_test[:,1]
 		Abs_validation 	= Y_validation[:,1]
-		RunAllModels(Abs_train, Abs_test, Abs_validation, X_train, Y_train[:,0], X_test, Y_test[:,0], X_validation,Y_validation[:,0])
+		
+		RunAllModels(Abs_train, Abs_test, Abs_validation, X_train, Y_train[:,0], X_test, Y_test[:,0], X_validation,Y_validation[:,0],i)
 
 def my_own_accuracy(y_true, y_pred):
 	plus = 1.0
@@ -111,7 +115,7 @@ def my_own_accuracy(y_true, y_pred):
 		print(accuracy_score(y_true,y_pred))
 		return(accuracy_score(y_true,y_pred))
 		print('-----------------------------')
-def RunAllModels(Abs_train, Abs_test, Abs_validation ,X_train, Y_train, X_test, Y_test, X_validation,Y_validation):
+def RunAllModels(Abs_train, Abs_test, Abs_validation ,X_train, Y_train, X_test, Y_test, X_validation,Y_validation, window_number):
 	#RunLR (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LR_')
 	#RunLDA(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LDA')
 	#RunLAS(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'LAS')
@@ -119,11 +123,11 @@ def RunAllModels(Abs_train, Abs_test, Abs_validation ,X_train, Y_train, X_test, 
 	#RunNB (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'NB_')
 	#RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'KNN')
 	s = 0.0
-	p =  RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train, X_test, Y_test,X_validation,Y_validation, 'SVM')
+	p =  RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train, X_test, Y_test,X_validation,Y_validation, 'SVM', window_number)
 		#q = RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 	s = s + p
 		#s1 = s1 + q
-	print('average svm ' + str(s/10))
+	#print('average svm ' + str(s/10))
 	#print('average rf ' + str(s/10))
 	#RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
 	#RunERF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'ERF')
@@ -157,24 +161,28 @@ def GenerateCnfMatrix(Y_pred, Y_test):
 	cnf_matrix 	= confusion_matrix(Y_t, Y_p, labels = [1,-1])
 	return cnf_matrix
 
-def ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, 	actual_dist):
+def ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, 	actual_dist, need_print):
 	per_train, acc_train 	= ComputeAccuracyForOne(cnf_mat_train)
 	per_test, acc_test 		= ComputeAccuracyForOne(cnf_mat_test)
-	print (name + '_dist_actual_total          : ' + '%.3f %%,\t %.3f %%' %actual_dist)
-	print (name + '_dist_pred_train            : ' + '%.3f %%,\t %.3f %%' %per_train)
-	print (name + '_dist_pred_test             : ' + '%.3f %%,\t %.3f %%' %per_test)
-	print (name + '_accuracy_train_[T,+,-]     : ' + '%.3f %%,\t %.3f %%,\t %.3f %%' %acc_train)
-	print (name + '_accuracy_test__[T,+,-]     : ' + '%.3f %%,\t %.3f %%,\t %.3f %%' %acc_test)
+	if(need_print == 1):
+		print (name + '_dist_actual_total          : ' + '%.3f %%,\t %.3f %%' %actual_dist)
+		print (name + '_dist_pred_train            : ' + '%.3f %%,\t %.3f %%' %per_train)
+		print (name + '_dist_pred_test             : ' + '%.3f %%,\t %.3f %%' %per_test)
+		print (name + '_accuracy_train_[T,+,-]     : ' + '%.3f %%,\t %.3f %%,\t %.3f %%' %acc_train)
+		print (name + '_accuracy_test__[T,+,-]     : ' + '%.3f %%,\t %.3f %%,\t %.3f %%' %acc_test)
 	return (per_test, per_train, acc_test, acc_train)
 
-def ComputeReturns(Abs_test, Abs_train, pred_test, pred_train,  Y_test, Y_train, name):
+def ComputeReturns(Abs_test, Abs_train, pred_test, pred_train,  Y_test, Y_train, name, need_print):
 	ret_total_test, ret_cor_incor_test = Returns(Abs_test, pred_test, Y_test)
 	ret_total_train, ret_cor_incor_train = Returns(Abs_train, pred_train, Y_train)
-	print ('	')
-	print (name+'_ret.p.t_train_[T,+,-]      : '+'%.3f %%,\t %.3f %%,\t %.3f %%'%ret_total_train)
-	print (name+'_ret.p.t_train_[cor, incor] : '+'%.3f %%,\t %.3f %%'%ret_cor_incor_train)
-	print (name+'_ret.p.t_test_[T,+,-]       : '+'%.3f %%,\t %.3f %%,\t %.3f %%'%ret_total_test)
-	print (name+'_ret.p.t_test_[cor, incor]  : '+'%.3f %%,\t %.3f %%'%ret_cor_incor_test)
+
+	if(need_print == 1):
+		print ('	')
+		print (name+'_ret.p.t_train_[T,+,-]      : '+'%.3f %%,\t %.3f %%,\t %.3f %%'%ret_total_train)
+		print (name+'_ret.p.t_train_[cor, incor] : '+'%.3f %%,\t %.3f %%'%ret_cor_incor_train)
+		print (name+'_ret.p.t_test_[T,+,-]       : '+'%.3f %%,\t %.3f %%,\t %.3f %%'%ret_total_test)
+		print (name+'_ret.p.t_test_[cor, incor]  : '+'%.3f %%,\t %.3f %%'%ret_cor_incor_test)
+
 	return (ret_total_train,ret_cor_incor_train, ret_total_test,ret_cor_incor_test)
 
 def Returns(Abs, pred, Y):
@@ -362,61 +370,81 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 	if CALCULATE_RETURNS == 'y':
 		returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
 	print ('------------------------------------------')
-
-#for the time being assume validation to be test and test to be validation
-def RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train,  X_test, Y_test, X_validation, Y_validation, name):
-	#for i in range(1,30):
-	#custom_score = make_scorer(my_own_accuracy )
+####################### IMPORTANT NOTE ####################################################
+#######for the time being assume validation to be test and test to be validation###########
+##########that has been done to keep rest of the code same#################################
+##########       train is first 1000, test is next 200 and validation is next 100 from test_end
+def RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train,  X_test, Y_test, X_validation, Y_validation, name, window_number):
 	#G_range = [1]
-	G_range_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.28,0.75,1]+range(10,140)
-	C_range = [0.5,1,2,7,8,10,15,50,100,150,500,700,1000,2500,10000]
-	G_range = [1.0/i for i in G_range_]
+	#custom_score = make_scorer(my_own_accuracy )
+	G_range_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.25,0.28,0.75,1]+range(10,140)
+	C_range  = [0.5,1,2,7,8,10,15,50,100,150,500,700,1000,2500,10000]
+	G_range  = [1.0/i for i in G_range_]
+
 	#C_range = [1000]
 	c_array = []
 	g_array = [] 
+
+	#actual distribution in train and test set i.e. first 1200
 	actual_dist_array = []
-	predicted_test_array =[]
-	predicted_train_array =[]
-	predicted_train_acc_array =[]
-	predicted_test_acc_array = []
-	ret_pt_tot_train =[]
-	ret_pt_cor_inc_train=[]
-	ret_pt_tot_test=[]
-	ret_pt_cor_inc_test=[]
+	
+	#distribution in predicted test and train 
+	predicted_test_array  = []
+	predicted_train_array = []
+	
+	#accuracy in predicted test and train
+	predicted_train_acc_array = []
+	predicted_test_acc_array  = []
+	
+	#return per_trade for predicted train and test
+	ret_pt_tot_train     = []
+	ret_pt_cor_inc_train = []
+	ret_pt_tot_test      = []
+	ret_pt_cor_inc_test  = []
+
+	#loop to iterate C and gamma for radial basis function
 	for c in C_range:
 		for g in G_range:
-			print 'c ' +str(c)
-			print 'g ' +str(g)
-	#param_grid =  [{ 'C': C_range,'kernel': ['rbf']}]
-	#clf = model_selection.GridSearchCV(model, param_grid, cv = TimeSeriesSplit(n_splits = 5))
-	#clf.fit(X_train, Y_train)
-	#x = (clf.best_params_ )
-	#print x
-	#model.set_params(**x)
-	
-			model 			= SVC(C = c, kernel = 'rbf', gamma = g)
 
+			model 			= SVC(C = c, kernel = 'rbf', gamma = g)
 			model.fit(X_train, Y_train)
+		
 			pred_train 	= model.predict(X_train)
 			pred_test 	= model.predict(X_test)
 	
 			cnf_mat_test 	= GenerateCnfMatrix(pred_test, Y_test)
 			cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
-			actual_dist 	= ComputeDistribution(Y_train, Y_test)	
+			actual_dist 	= ComputeDistribution(Y_train, [])		
+			accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist,0)
 			
-			accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
+			#conditions
+			#  actual distribution is calculated over first 1200
+			#    1. percentage of plus in predicted test >= actual distribution of plus - 7
+			#    2. percentage of plus in predicted test <= actual distribution of plus + 7
+			#    3. Total accuracy > 55
+			#    4. Plus accuracy > 50
+			#    5. Minus accuracy > 50
 
-			print(' ')
-			print ('------------------------------------------')
-			if accuracy[0][0] >= (actual_dist[0] - 7) and accuracy[0][0] <= (actual_dist[0] + 7) and accuracy[2][0] > 55 and accuracy[2][1] > 50 and accuracy[2][2] > 50:
-				returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name)
+			#putting condition over plus accuracy and minus accuracy
+			conditional_plus_accuracy = 40
+			conditional_minus_accuracy = 40
+
+			#append only those values in array which satisfy this loop
+			if (accuracy[0][0] >= (actual_dist[0] - 7)) and (accuracy[0][0] <= (actual_dist[0] + 7)) and (accuracy[2][0] > 55) and (accuracy[2][1] > conditional_plus_accuracy) and (accuracy[2][2] > conditional_minus_accuracy):
+				
+				returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name,0)
+				
 				c_array.append(c)
 				g_array.append(g)
+				
 				actual_dist_array.append(list(actual_dist))
+				
 				predicted_test_array.append(list(accuracy[0]))
 				predicted_train_array.append(list(accuracy[1]))
+				
 				predicted_test_acc_array.append(list(accuracy[2])) 
 				predicted_train_acc_array.append(list(accuracy[3]))
+				
 				ret_pt_tot_train.append(list(returns[0]))
 				ret_pt_tot_test.append(list(returns[2]))
 				ret_pt_cor_inc_train.append(list(returns[1]))
@@ -427,6 +455,9 @@ def RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train,  X_test, Y_tes
 	print ('------------------------------------------')
 	print ('------------------------------------------')
 	print ('------------------------------------------')
+	
+	#################################################################
+	#transposing all the valus to fit in csv
 	c_array = np.asarray(c_array).T
 	g_array = np.asarray(g_array).T
 	ret_pt_tot_train = np.asarray(ret_pt_tot_train).T
@@ -438,42 +469,60 @@ def RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train,  X_test, Y_tes
 	predicted_test_acc_array = np.asarray(predicted_test_acc_array).T
 	predicted_test_array = np.asarray(predicted_test_array).T
 	actual_dist_array = np.asarray(actual_dist_array).T
+	######################################################################
 
-	test_accuracy = predicted_test_acc_array[:,0]
-	sorted_test_accuracy_arg = np.argsort(test_accuracy)
-	index_for_best_c_g = sorted_test_accuracy_arg[len(sorted_test_accuracy_arg) - 1]
-	c = c_array[index_for_best_c_g]
-	g = g_array[index_for_best_c_g]
-	print("best c " + str(c))
-	print("best c " + str(g))
-	model = SVC(C = c, gamma = g, kernel = 'rbf')
-	X_train = np.vstack((X_train,X_test))
-	Y_train = np.hstack((Y_train,Y_test))
-	Abs_train = np.hstack((Abs_train,Abs_test))
-	pred_train = np.hstack((pred_train, pred_test))
-	model.fit(X_train, Y_train)
-	pred_validation = model.predict(X_validation)
-	cnf_mat_test 	= GenerateCnfMatrix(pred_validation, Y_validation)
-	cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
-	actual_dist 	= ComputeDistribution(Y_train, Y_validation)	
-		
-	accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist)
-	print('----------------------------')
-	ComputeReturns(Abs_validation, Abs_train, pred_validation, pred_train, Y_validation, Y_train, name)
 
-	print(' ')
-	print ('------------------------------------------')
-	print(' ')
-	print ('------------------------------------------')
-	print ('------------------------------------------')
-	print ('------------------------------------------')
+	if(len(predicted_test_acc_array) > 0):
+		#total accuracy of predicted test
+		test_accuracy = predicted_test_acc_array[:,0]
+	
+		#index of sorted test_accuracy(200 after 1000)
+		sorted_test_accuracy_arg = np.argsort(test_accuracy)
+	
+		index_for_best_c_g = sorted_test_accuracy_arg[len(sorted_test_accuracy_arg) - 1 ]
+		c = c_array[index_for_best_c_g]
+		g = g_array[index_for_best_c_g]
+
+		print("best c " + str(c))
+		print("best gamma " + str(g))
+
+		model = SVC(C = c, gamma = g, kernel = 'rbf')
+
+		X_train = np.vstack((X_train,X_test))
+		Y_train = np.hstack((Y_train,Y_test))
+		Abs_train = np.hstack((Abs_train,Abs_test))
+
+
+		model.fit(X_train, Y_train)
+		pred_train = model.predict(X_train)
+		pred_validation = model.predict(X_validation)
+		cnf_mat_test 	= GenerateCnfMatrix(pred_validation, Y_validation)
+		cnf_mat_train 	= GenerateCnfMatrix(pred_train, Y_train)
+		####actual distribution over all the data passed train + test + validation
+		actual_dist 	= ComputeDistribution(Y_train, Y_validation)	
+	
+		accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist,1)
+		print('----------------------------')
+		ComputeReturns(Abs_validation, Abs_train, pred_validation, pred_train, Y_validation, Y_train, name,1)
+		print ('------------------------------------------')
+		print ('------------------------------------------')
+		print ('------------------------------------------')
+		#out = out.T
+		#header = ['c','gamma','dist_plus_actual','dist_minus_act','pred_plus_train','pred_minus_train','pred_plus_test','pred_minus_test','pred_tain_accuracy_tot','pred_train_acc_plus','pred_train_acc_minus','pre_test_acc_tot','pred_test_acc_plus','pred_test_acc_minus','ret_pt_tot_train','ret_pt_tot_plus','ret_pt_train_minus','ret_pt_cor_train','ret_pt_inc_train','rt_pt_tot_test','rt_pt_plus_test','rt_pt_minus_test','rt_pt_cor_test','ret_pt_inc_test']	
+		#header = np.asarray(header)
+		#out = np.vstack((header,out))
+	else:
+		print('----no best c and gamma----------------')
+
+	#
 	out = np.vstack((c_array,g_array,actual_dist_array,predicted_train_array,predicted_test_array,predicted_train_acc_array,predicted_test_acc_array,ret_pt_tot_train,ret_pt_cor_inc_train,ret_pt_tot_test,ret_pt_cor_inc_test))
-	#out = out.T
-	#header = ['c','gamma','dist_plus_actual','dist_minus_act','pred_plus_train','pred_minus_train','pred_plus_test','pred_minus_test','pred_tain_accuracy_tot','pred_train_acc_plus','pred_train_acc_minus','pre_test_acc_tot','pred_test_acc_plus','pred_test_acc_minus','ret_pt_tot_train','ret_pt_tot_plus','ret_pt_train_minus','ret_pt_cor_train','ret_pt_inc_train','rt_pt_tot_test','rt_pt_plus_test','rt_pt_minus_test','rt_pt_cor_test','ret_pt_inc_test']	
-	#header = np.asarray(header)
-	#out = np.vstack((header,out))
-	np.savetxt("c_gaama_filtered.csv", out.T, delimiter=",")
+	name_of_file = str(c)+'_' + str(g)+ '_' + str(window_number)+ '.csv'
+	np.savetxt(name_of_file, out.T, delimiter=",")
+
+	print '----------------moving to other window-------------'
+	
 	return(accuracy[2][0])
+
 #to calculate accuracy when test is predicted over a threshold
 def calculate_acc(y_pred, 	y_true):
 	tot_plus = 0.0
