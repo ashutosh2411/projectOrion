@@ -8,14 +8,14 @@ from os.path import isfile, join
 from sklearn import svm
 import pandas
 
-filename = 'nifty_2000_2005.csv'
+filename = 'AAPL_2001_to_2017.csv'
 
 def main(filename):
 	in_address = filename
 	dataset = pandas.read_csv(in_address)
 	data = dataset.values
 	date_ycc = data[:,0]
-	date_yoc = np.hstack((data[1:,0],'11-11-1911'))
+	date_yoc = np.hstack((data[1:,0],'1911-11-11'))
 	day_ycc = day_to_date(date_ycc)
 	day_yoc = day_to_date(date_yoc)
 
@@ -147,14 +147,14 @@ def main(filename):
 	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,yoc(o,c),ypast,past_lag_nday,y_hc,y_lc,yoc_cc,indicators,out[3:])).T
 	array_cc = pandas.DataFrame(np.vstack((head,array_cc)))
 
-	array_cc.to_csv(filename[:-4] + '_ycc.csv',index = False)
-	array_oc.to_csv(filename[:-4] + '_yoc.csv',index = False)
+	array_cc.to_csv(filename[:-4] + 'all_ycc.csv',index = False)
+	array_oc.to_csv(filename[:-4] + 'all_yoc.csv',index = False)
 
 #converts list of days to list of dates
 def day_to_date(date):
 	day = []
 	for i in date:	
-		day.append(datetime.datetime.strptime(i, "%d-%m-%Y").strftime('%A'))
+		day.append(datetime.datetime.strptime(i, "%Y-%m-%d").strftime('%A'))
 	return day
 
 #calculates the difference between today's opening and yesterday's closing

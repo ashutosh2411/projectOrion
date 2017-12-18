@@ -27,7 +27,7 @@ from sklearn.decomposition import PCA
 
 #################################################################################################
 ################# CHANGES TO BE MADE ONLY IN FOLLOWING PART #####################################
-filename = 'nifty_2000_2005_ycc.csv'
+filename = 'master_nifty_manish.csv'
 DO_PCA 					= 'n'
 SPLIT_RANDOM			= 'n'				# 'y' for randomized split, anything else otherwise
 DO_FEATURE_SELECTION 	= 'n'				# 'y' for yes, anything else otherwise
@@ -36,17 +36,26 @@ def r(l,u):
 	return range(l, u+1)
 
 #X_COLS 				= r(2,27)+r(28,43)+r(44,59)+r(60,75)+r(76,91)+r(92,107)+r(108,113)+r(114,119)			# both included; 2 means column C in excel
-X_COLS = [37,38,36,48,47,45,40,57,46,44,73]
-X_TRAIN_START		= 50
-X_TRAIN_END			= 1050						# 50 means 50th row in excel
-X_TEST_START		= 1050				# end is included
-X_TEST_END			= 1250
+X_COLS = [37,38,39,41,45,46,47,48,49,58,74]
+
+#################### don't confuse with name the split is in order-: train->
+#################### test(for code simplicity)->validation(for test purpose)
+#################### range of train, validation and test is by default validation + test size
+X_TRAIN_START		= 2000
+X_TRAIN_END			= 3000						# 50 means 50th row in excel
+X_TEST_START		= 3000				# end is included
+X_TEST_END			= 3200
 Y_COLS 	 			= 121				# Y to be predicted											# 
 
 CALCULATE_RETURNS	= 'y'				# 'y' for yes, anything else otherwise
 RETURNS_COLS 		= 120		# To calculate returns. size same as Y_TO_PREDICT 	# If CALCULATE_RETURNS is not 'y', put any valid column in this one
 
 N_FEATURES 			= None				# Number of features to select
+
+#########################
+Window_Size         = 100               #size of each rolling window
+test_size           = 100				#size of each test set
+#########################
 
 COL_TOBE_SCALED 	= [32,6]			# 32 = OBV, 6 = Volume_today
 ##################### NO CHANGES BEYOND THIS POINT ##############################################
@@ -61,12 +70,13 @@ def MAIN(file):
 		if SPLIT_RANDOM == 'y':
 			X_train, X_test, Y_train, Y_test = model_selection.train_test_split(data[X_TRAIN_START:X_TRAIN_END,X_COLS], data[X_TRAIN_START:X_TRAIN_END,[Y_COLS,RETURNS_COLS]], test_size=.2, random_state = 0)
 		else:
-			X_train 	 = data[X_TRAIN_START + i*100 : X_TRAIN_END + i*100     , X_COLS]
-			Y_train 	 = data[X_TRAIN_START + i*100 : X_TRAIN_END + i*100     , [Y_COLS,RETURNS_COLS]]
-			X_test 		 = data[X_TEST_START  + i*100 : X_TEST_END  + i*100     , X_COLS]
-			Y_test 		 = data[X_TEST_START  + i*100 : X_TEST_END  + i*100     , [Y_COLS,RETURNS_COLS]]	
-			X_validation = data[X_TEST_END    + i*100 : X_TEST_END  + i*100+100 , X_COLS]
-			Y_validation = data[X_TEST_END    + i*100 : X_TEST_END  + i*100+100 , [Y_COLS,RETURNS_COLS]]
+			###################sequential split of train validation, test#################### 
+			X_train 	 = data[X_TRAIN_START + i*Window_Size : X_TRAIN_END + i*Window_Size       , X_COLS]
+			Y_train 	 = data[X_TRAIN_START + i*Window_Size : X_TRAIN_END + i*Window_Size       , [Y_COLS,RETURNS_COLS]]
+			X_test 		 = data[X_TEST_START  + i*Window_Size : X_TEST_END  + i*Window_Size       , X_COLS]
+			Y_test 		 = data[X_TEST_START  + i*Window_Size : X_TEST_END  + i*Window_Size       , [Y_COLS,RETURNS_COLS]]	
+			X_validation = data[X_TEST_END    + i*Window_Size : X_TEST_END  + i*Window_Size + 100 , X_COLS]
+			Y_validation = data[X_TEST_END    + i*Window_Size : X_TEST_END  + i*Window_Size + 100 , [Y_COLS,RETURNS_COLS]]
 
 		X_train			= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(X_train)
 		Y_train			= Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0).fit_transform(Y_train)
@@ -91,6 +101,7 @@ def MAIN(file):
 		
 		RunAllModels(Abs_train, Abs_test, Abs_validation, X_train, Y_train[:,0], X_test, Y_test[:,0], X_validation,Y_validation[:,0],i)
 
+############## not relevant just for test#####################
 def my_own_accuracy(y_true, y_pred):
 	plus = 1.0
 	minus = 1.0
@@ -122,10 +133,10 @@ def RunAllModels(Abs_train, Abs_test, Abs_validation ,X_train, Y_train, X_test, 
 	#RunRID(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RID')
 	#RunNB (Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'NB_')
 	#RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'KNN')
-	s = 0.0
-	p =  RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train, X_test, Y_test,X_validation,Y_validation, 'SVM', window_number)
+	#s = 0.0
+	RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train, X_test, Y_test,X_validation,Y_validation, 'SVM', window_number)
 		#q = RunRF(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, 'RF_')
-	s = s + p
+	#s = s + p
 		#s1 = s1 + q
 	#print('average svm ' + str(s/10))
 	#print('average rf ' + str(s/10))
@@ -375,10 +386,8 @@ def RunKNN(Abs_train, Abs_test, X_train, Y_train, X_test, Y_test, name):
 ##########that has been done to keep rest of the code same#################################
 ##########       train is first 1000, test is next 200 and validation is next 100 from test_end
 def RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train,  X_test, Y_test, X_validation, Y_validation, name, window_number):
-	#G_range = [1]
-	#custom_score = make_scorer(my_own_accuracy )
-	G_range_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.25,0.28,0.75,1]+range(10,140)
-	C_range  = [0.5,1,2,7,8,10,15,50,100,150,500,700,1000,2500,10000]
+	G_range_ = [0.001,0.005,0.01,0.05,0.1,0.15,0.25,0.28,0.75,1]+[10,20,40]
+	C_range  = [0.8,1,2,6,7,8,10,50,100,1000,2500]
 	G_range  = [1.0/i for i in G_range_]
 
 	#C_range = [1000]
@@ -417,20 +426,16 @@ def RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train,  X_test, Y_tes
 			actual_dist 	= ComputeDistribution(Y_train, [])		
 			accuracy 		= ComputeAccuracy(cnf_mat_test, cnf_mat_train, name, actual_dist,0)
 			
+			##############        change conditions accordingly          ####################
+			
 			#conditions
-			#  actual distribution is calculated over first 1200
-			#    1. percentage of plus in predicted test >= actual distribution of plus - 7
-			#    2. percentage of plus in predicted test <= actual distribution of plus + 7
-			#    3. Total accuracy > 55
-			#    4. Plus accuracy > 50
-			#    5. Minus accuracy > 50
-
+			# accuracy[0][0] is percentage plus in test(i.e. validation here)
+			# accuracy[0][1] is percentage minus in test(i.e. validation here)
+			# accuracy[1][0] is percentage plus in train
+			# accuracy[2][0] is total accuracy test(i.e. validation here) ([2][1] and [2][2] consecutively plus)
+			# accuracy[3][0] is percentage plus in train
 			#putting condition over plus accuracy and minus accuracy
-			conditional_plus_accuracy = 40
-			conditional_minus_accuracy = 40
-
-			#append only those values in array which satisfy this loop
-			if (accuracy[0][0] >= (actual_dist[0] - 7)) and (accuracy[0][0] <= (actual_dist[0] + 7)) and (accuracy[2][0] > 55) and (accuracy[2][1] > conditional_plus_accuracy) and (accuracy[2][2] > conditional_minus_accuracy):
+			if  (accuracy[2][0] > 52) and (accuracy[0][0] < 65) and (accuracy[3][0] < 75) :
 				
 				returns 		= ComputeReturns(Abs_test, Abs_train, pred_test, pred_train, Y_test, Y_train, name,0)
 				
@@ -474,7 +479,7 @@ def RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train,  X_test, Y_tes
 
 	if(len(predicted_test_acc_array) > 0):
 		#total accuracy of predicted test
-		test_accuracy = predicted_test_acc_array[:,0]
+		test_accuracy = predicted_test_acc_array[0,:]
 	
 		#index of sorted test_accuracy(200 after 1000)
 		sorted_test_accuracy_arg = np.argsort(test_accuracy)
@@ -516,8 +521,8 @@ def RunSVM(Abs_train, Abs_test, Abs_validation, X_train, Y_train,  X_test, Y_tes
 
 	#
 	out = np.vstack((c_array,g_array,actual_dist_array,predicted_train_array,predicted_test_array,predicted_train_acc_array,predicted_test_acc_array,ret_pt_tot_train,ret_pt_cor_inc_train,ret_pt_tot_test,ret_pt_cor_inc_test))
-	name_of_file = str(c)+'_' + str(g)+ '_' + str(window_number)+ '.csv'
-	np.savetxt(name_of_file, out.T, delimiter=",")
+	name_of_file = 'nifty_till_2017'+str(c)+'_' + str(g)+ '_' + str(window_number)+ '.csv'
+	#np.savetxt(name_of_file, out.T, delimiter=",")
 
 	print '----------------moving to other window-------------'
 	

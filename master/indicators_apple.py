@@ -55,7 +55,7 @@ def main(filename):
 	l_l = l
 	c_c = c
 	v_v = v
-	alpha = 1.0
+	alpha = 0.8
 	o = Smoothen(o, alpha)
 	h = Smoothen(h, alpha)
 	l = Smoothen(l, alpha)
@@ -195,8 +195,8 @@ def main(filename):
 	array_cc = np.vstack((date_ycc, day_ycc, o,h,l,c,v,yoc(o,c),ypast,past_lag_nday,y_hc,y_lc,yoc_cc,indicators,out[3:])).T
 	array_cc = pandas.DataFrame(np.vstack((head,array_cc)))
 
-	array_cc.to_csv(filename[:-4] + '_ycc.csv',index = False)
-	array_oc.to_csv(filename[:-4] + '_yoc.csv',index = False)
+	array_cc.to_csv(filename[:-4] + 'smooth_ycc.csv',index = False)
+	array_oc.to_csv(filename[:-4] + 'smooth_yoc.csv',index = False)
 
 def Smoothen(x, alpha):
 	x_ = x
