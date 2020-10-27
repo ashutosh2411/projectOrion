@@ -11,7 +11,7 @@ chardet==3.0.4
 configglue==1.1.3.post0
 configobj==5.0.6
 constantly==15.1.0
-cryptography==2.1.4
+cryptography==3.2
 cycler==0.10.0
 Cython==0.27.3
 debtags==2.0
