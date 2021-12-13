@@ -36,7 +36,7 @@ ipaddress==1.0.18
 Kivy==1.9.0
 Kivy-Garden==0.1.4
 lockfile==0.12.2
-lxml==4.1.1
+lxml==4.6.5
 Mako==1.0.7
 MarkupSafe==1.0
 matplotlib==2.1.0
