@@ -50,7 +50,7 @@ oneconf==0.3.9
 PAM==0.4.2
 pandas==0.21.0
 pandas-talib==0.0.1
-paramiko==2.4.0
+paramiko==2.10.1
 pexpect==4.3.0
 Pillow==4.3.0
 piston-mini-client==0.7.5
