@@ -43,7 +43,7 @@ matplotlib==2.1.0
 monotonic==1.4
 nemo-emblems==3.4.1
 netifaces==0.10.6
-numpy==1.13.3
+numpy==1.22.0
 oauthlib==2.0.6
 olefile==0.44
 oneconf==0.3.9
